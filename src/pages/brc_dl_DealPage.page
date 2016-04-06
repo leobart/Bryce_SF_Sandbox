@@ -1,0 +1,313 @@
+<apex:page controller="BRC_DL_DealController">
+    
+<apex:includeScript value="{!URLFOR($Resource.JQuery)}"/>  
+<apex:includeScript value="{!URLFOR($Resource.JQueryBlockUI)}"/>  
+<apex:includeScript value="{!URLFOR($Resource.BlockUIConfig)}"/>
+    
+<style>
+		.Custom14Tab .tertiaryPalette{
+            background-color: #DBDBDB;
+            border-color: #D1BF74;
+		}
+    
+        body .bPageBlock, 
+        body .secondaryPalette.bPageBlock {
+            background-color: #FCFCFC;
+    		/*border-bottom: 1px solid #eaeaea;
+            border-left: 1px solid #eaeaea;
+    		border-right: 1px solid #eaeaea;*/
+            -moz-border-radius: 4px;
+            -webkit-border-radius: 4px;
+            border-radius: 4px;
+        }
+    
+    
+    .apexp .totalRow {
+        font-weight: bold;
+        background-color: #FFFFFF;
+    }
+    
+    .apexp .detailList .list .totalRow th,
+    body .pbBody table.list tr th.totalRow {
+        border: 0px;
+        border-top: 1px solid #B1B0B0;
+        background: rgba(245, 161, 161, 0);
+    }
+    
+    body .apexp .pbBody table.list {
+	    border: 0;
+    }
+    
+    .apexp .detailList .list td, .apexp .detailList .list th, .apexp .editPage .bPageBlock .detailList .list tr td, .apexp .editPage .bPageBlock .detailList .list tr th {
+    	border-bottom: 0;
+    }
+    
+    .apexp .editPage .bPageBlock .detailList .list tr td,
+    body .pbBody table.list tr.dataRow td{
+    	border: 0px;
+    	border-top: 1px solid #C9C9C9;
+    }  
+    
+    body .pbBody table.list tr.headerRow th{
+        border-width: 0px;
+    } 
+</style>
+    
+<apex:form >
+    <apex:actionStatus onstart="blockPage()" onstop="unblockPage()" id="blockUI"/>
+    <apex:sectionHeader title="Bryce" subtitle="Deals"/>
+    <apex:outputPanel id="mainBlock">
+        <apex:pageMessages />
+        <apex:actionRegion >
+        <table style="width:100%">
+            <tr>
+                <td style="vertical-align: middle; font-weight:bold"><apex:outputLabel >Company: </apex:outputLabel></td>
+                <td style="vertical-align: middle">
+                    <apex:actionRegion >
+                        <apex:selectList value="{!selectedCompany}" size="1">
+                            <apex:selectOptions value="{!companyListSO}"/>
+                            <apex:actionSupport event="onchange" action="{!companyChangedAction}" status="blockUI" reRender="mainBlock"/>
+                        </apex:selectList>
+                    </apex:actionRegion>
+                </td>
+                
+                <td style="display:none"><apex:inputField value="{!filterFields.Company__c}"/></td>
+                <td style="display:none"><apex:inputField value="{!filterFields.Type__c}"/></td>
+
+                <td style="vertical-align:middle; font-weight:bold"><apex:outputLabel >Sell Contract:</apex:outputLabel></td>
+                <td style="vertical-align:middle"><apex:inputField value="{!filterFields.Contract__c}" required="false" /></td>
+                
+                <td style="vertical-align:middle; font-weight:bold"><apex:outputLabel >Sell Addendum:</apex:outputLabel></td>
+                <td style="vertical-align:middle"><apex:inputField value="{!filterFields.Addendum__c}"/></td>
+                
+                <td style="vertical-align: middle; font-weight:bold"><apex:outputLabel >Month: </apex:outputLabel></td>
+                <td style="vertical-align: middle">
+                    <apex:selectList value="{!selectedMonth}" size="1">
+                        <apex:selectOptions value="{!monthsSO}"/>
+                    </apex:selectList>
+                </td>
+                
+                <td style="vertical-align: middle; font-weight:bold"><apex:outputLabel >Year: </apex:outputLabel></td>
+                <td style="vertical-align: middle">
+                    <apex:selectList value="{!selectedYear}" size="1">
+                        <apex:selectOptions value="{!yearsSO}"/>
+                    </apex:selectList>
+                </td>
+                <td style="vertical-align:middle">
+                    <apex:outputPanel >
+                        <apex:commandButton style="margin-right:10px" value="Find" action="{!findDealAction}"/>
+                        <apex:commandButton value="Create" action="{!createDealAction}" />
+                    </apex:outputPanel>
+                </td>
+                                
+            </tr>
+            <tr><td style="height:15px"></td></tr>
+        </table>
+        </apex:actionRegion>
+        <apex:repeat value="{!dealsRelationMap}" var="key">
+            <table width="100%">
+                <tr>
+                    <td width="50%">
+                        <div style="width:100%">
+                            <apex:pageBlock mode="edit" title="Sell To: {!dealsRelationMap[key].sellDeal.deal.Name}">
+                                <apex:pageBlockSection title="Contract details" collapsible="false">
+                                    <apex:outputField value="{!dealsRelationMap[key].sellDeal.deal.Contract__r.Account.Name}" />
+                                    <apex:outputLabel ></apex:outputLabel>
+                                    <apex:outputField value="{!dealsRelationMap[key].sellDeal.deal.Contract__c}" />
+                                    <apex:outputField value="{!dealsRelationMap[key].sellDeal.deal.Addendum__c}" />
+                                    <apex:outputField value="{!dealsRelationMap[key].sellDeal.deal.Planned_Quantity__c}" />
+                                    <apex:outputField value="{!dealsRelationMap[key].sellDeal.deal.Preliminary_Price__c}" />
+                                    <apex:outputField value="{!dealsRelationMap[key].sellDeal.deal.Prepayment_Percent__c}" />
+                                    <apex:outputField value="{!dealsRelationMap[key].sellDeal.deal.Shipment_Month__c}" />
+                                    <apex:pageBlockSectionItem >
+                                        <apex:outputLabel >Edit final price</apex:outputLabel>
+                                        <apex:inputCheckbox value="{!dealsRelationMap[key].sellDeal.editFinalPrice}">
+                                            <apex:actionSupport event="onchange" status="blockUI" reRender="mainBlock"/>
+                                        </apex:inputCheckbox>
+                                    </apex:pageBlockSectionItem>
+                                    <apex:outputField value="{!dealsRelationMap[key].sellDeal.deal.Final_Price__c}" rendered="{!!dealsRelationMap[key].sellDeal.editFinalPrice}"/>
+                                    <apex:inputField value="{!dealsRelationMap[key].sellDeal.deal.Final_Price__c}" rendered="{!dealsRelationMap[key].sellDeal.editFinalPrice}"/>
+                                </apex:pageBlockSection>
+                                <apex:pageBlockSection columns="1">
+                                    <apex:outputPanel >
+                                        <apex:pageBlockTable value="{!dealsRelationMap[key].sellDeal.amountLines}" var="ind">
+                                            <apex:column headerValue="Reference Number">
+                                                <apex:facet name="footer">Total:</apex:facet>
+                                                <apex:inputField value="{!dealsRelationMap[key].sellDeal.amountLines[ind].Line.Reference_Number__c}"  rendered="{!dealsRelationMap[key].sellDeal.amountLines[ind].edit}" required="true">
+                                                    <!--apex:actionSupport event="onchange" status="blockUI" reRender="mainBlock" action="{!calcAmountLinesAction}">
+                                                        <apex:param name="p1" value="{!key}" assignTo="{!selectedSellInd}"/>
+                                                        <apex:param name="p2" value="-1" assignTo="{!selectedBuyInd}"/>
+                                                    </apex:actionSupport-->
+                                                </apex:inputField>
+                                                <apex:outputField value="{!dealsRelationMap[key].sellDeal.amountLines[ind].Line.Reference_Number__c}" rendered="{!!dealsRelationMap[key].sellDeal.amountLines[ind].edit}"/>
+                                            </apex:column>
+                                            <apex:column headerValue="FF Invoice">
+                                                <apex:outputPanel rendered="{!!dealsRelationMap[key].sellDeal.amountLines[ind].ffObjectAssigned}">
+                                                    <apex:commandLink value="create"/>&nbsp;
+                                                    <apex:commandLink value="pick" status="blockUI" reRender="mainBlock">
+                                                        <apex:param name="p1" value="{!NOT(dealsRelationMap[key].sellDeal.amountLines[ind].isEdit)}" assignTo="{!dealsRelationMap[key].sellDeal.amountLines[ind].isEdit}"/>
+                                                    </apex:commandLink>
+                                                </apex:outputPanel>
+                                                <apex:inputField value="{!dealsRelationMap[key].sellDeal.amountLines[ind].Line.SIN__c}" rendered="{!dealsRelationMap[key].sellDeal.amountLines[ind].showInputSIN}" />
+                                                <apex:inputField value="{!dealsRelationMap[key].sellDeal.amountLines[ind].Line.SCR__c}" rendered="{!dealsRelationMap[key].sellDeal.amountLines[ind].showInputSCR}" />
+                                                <apex:outputField value="{!dealsRelationMap[key].sellDeal.amountLines[ind].Line.SIN__c}" rendered="{!dealsRelationMap[key].sellDeal.amountLines[ind].showOutputField}" />
+                                                <apex:outputField value="{!dealsRelationMap[key].sellDeal.amountLines[ind].Line.SCR__c}" rendered="{!dealsRelationMap[key].sellDeal.amountLines[ind].showOutputField}" />
+                                            </apex:column>
+                                            <apex:column headerValue="Amount"> 
+                                                <apex:inputField value="{!dealsRelationMap[key].sellDeal.amountLines[ind].Line.Amount__c}"  rendered="{!dealsRelationMap[key].sellDeal.amountLines[ind].editAmt}"  required="true"/>
+                                                <apex:outputField value="{!dealsRelationMap[key].sellDeal.amountLines[ind].Line.Amount__c}" rendered="{!!dealsRelationMap[key].sellDeal.amountLines[ind].editAmt}"/>
+                                            </apex:column>
+                                            <apex:column headerValue="Quantity">
+                                                <apex:facet name="footer"><apex:outputText value="{0,number,###,###,##0.000}"><apex:param value="{!dealsRelationMap[key].sellDeal.totalQuantity}"/></apex:outputText></apex:facet>
+                                                <apex:outputField value="{!dealsRelationMap[key].sellDeal.amountLines[ind].Line.Quontity__c}" rendered="{!!dealsRelationMap[key].sellDeal.amountLines[ind].editQuant}"/>
+                                                <apex:inputField value="{!dealsRelationMap[key].sellDeal.amountLines[ind].Line.Quontity__c}"  rendered="{!dealsRelationMap[key].sellDeal.amountLines[ind].editQuant}"  required="true">
+                                                    <apex:actionSupport event="onchange" status="blockUI" reRender="mainBlock" action="{!calcAmountLinesAction}">
+                                                        <apex:param name="p1" value="{!key}" assignTo="{!selectedSellInd}"/>
+                                                        <apex:param name="p2" value="-1" assignTo="{!selectedBuyInd}"/>
+                                                    </apex:actionSupport>
+                                                </apex:inputField>
+                                            </apex:column>
+                                            <apex:column headerValue="Date">
+                                                <apex:inputField value="{!dealsRelationMap[key].sellDeal.amountLines[ind].Line.Date__c}"  rendered="{!dealsRelationMap[key].sellDeal.amountLines[ind].edit}"/>
+                                                <apex:outputField value="{!dealsRelationMap[key].sellDeal.amountLines[ind].Line.Date__c}" rendered="{!!dealsRelationMap[key].sellDeal.amountLines[ind].edit}"/>
+                                            </apex:column>
+                                            <apex:column headerValue="Action">
+                                                <apex:outputField value="{!dealsRelationMap[key].sellDeal.amountLines[ind].Line.Type__c}" />
+                                                
+                                            </apex:column>
+                                        </apex:pageBlockTable>
+                                    </apex:outputPanel>
+                                </apex:pageBlockSection>
+                                <apex:pageBlockButtons location="bottom" style="text-align:right">
+                                    <apex:commandButton value="Save" status="blockUI" reRender="mainBlock" action="{!saveDealAction}" rendered="{!dealsRelationMap[key].sellDeal.saveEnabled}">
+                                        <apex:param name="p1" value="{!key}" assignTo="{!selectedSellInd}"/>
+                                        <apex:param name="p2" value="-1" assignTo="{!selectedBuyInd}"/>
+                                    </apex:commandButton>
+                                    <apex:commandButton value="Add Volune line" status="blockUI" reRender="mainBlock" action="{!addLineAction}" rendered="{!!dealsRelationMap[key].sellDeal.finalExists}">
+                                        <apex:param name="p1" value="{!key}" assignTo="{!selectedSellInd}"/>
+                                        <apex:param name="p2" value="-1" assignTo="{!selectedBuyInd}"/>
+                                    </apex:commandButton>
+                                    <apex:commandButton value="Add Final Invoice" status="blockUI" reRender="mainBlock" action="{!addFinalLineAction}" rendered="{!!dealsRelationMap[key].sellDeal.finalExists}">
+                                        <apex:param name="p1" value="{!key}" assignTo="{!selectedSellInd}"/>
+                                        <apex:param name="p2" value="-1" assignTo="{!selectedBuyInd}"/>
+                                    </apex:commandButton>
+                                </apex:pageBlockButtons>
+                            </apex:pageBlock>
+                        </div>
+                    </td>
+                    <td><div  width="10px"/></td>
+                    <td width="50%">
+                        <apex:repeat value="{!dealsRelationMap[key].buyDeals}" var="index">
+                            <div>
+                                <apex:pageBlock mode="edit" title="Buy From: {!dealsRelationMap[key].buyDeals[index].deal.Name}">
+                                    <apex:pageBlockSection title="Contract details" collapsible="false">
+                                        <apex:outputField value="{!dealsRelationMap[key].buyDeals[index].deal.Contract__r.Account.Name}" />
+                                        <apex:outputLabel ></apex:outputLabel>
+                                        <apex:outputField value="{!dealsRelationMap[key].buyDeals[index].deal.Contract__c}" />
+                                        <apex:outputField value="{!dealsRelationMap[key].buyDeals[index].deal.Addendum__c}" />
+                                        <apex:outputField value="{!dealsRelationMap[key].buyDeals[index].deal.Planned_Quantity__c}" />
+                                        <apex:outputField value="{!dealsRelationMap[key].buyDeals[index].deal.Preliminary_Price__c}" />
+                                        <apex:outputField value="{!dealsRelationMap[key].buyDeals[index].deal.Prepayment_Percent__c}" />
+                                        <apex:outputField value="{!dealsRelationMap[key].buyDeals[index].deal.Shipment_Month__c}" />
+                                        <apex:pageBlockSectionItem >
+                                            <apex:outputLabel >Edit final price</apex:outputLabel>
+                                            <apex:inputCheckbox value="{!dealsRelationMap[key].buyDeals[index].editFinalPrice}">
+                                                <apex:actionSupport event="onchange" status="blockUI" reRender="mainBlock"/>
+                                            </apex:inputCheckbox>
+                                        </apex:pageBlockSectionItem>
+                                        <apex:outputField value="{!dealsRelationMap[key].buyDeals[index].deal.Final_Price__c}" rendered="{!!dealsRelationMap[key].buyDeals[index].editFinalPrice}"/>
+                                        <apex:inputField value="{!dealsRelationMap[key].buyDeals[index].deal.Final_Price__c}" rendered="{!dealsRelationMap[key].buyDeals[index].editFinalPrice}"/>
+                                    </apex:pageBlockSection>
+                                	<apex:pageBlockSection columns="1">
+                                        <apex:pageBlockTable value="{!dealsRelationMap[key].buyDeals[index].amountLines}" var="ind">
+                                            <apex:column headerValue="Reference Number">
+                                                <apex:facet name="footer">Total:</apex:facet>
+                                                <apex:inputField value="{!dealsRelationMap[key].buyDeals[index].amountLines[ind].Line.Reference_Number__c}"  rendered="{!dealsRelationMap[key].buyDeals[index].amountLines[ind].edit}" required="true">
+                                                    <!--apex:actionSupport event="onchange" status="blockUI" reRender="mainBlock" action="{!calcAmountLinesAction}">
+                                                        <apex:param name="p1" value="{!key}" assignTo="{!selectedSellInd}"/>
+                                                        <apex:param name="p2" value="{!index}" assignTo="{!selectedBuyInd}"/>
+                                                    </apex:actionSupport-->
+                                                </apex:inputField>
+                                                <apex:outputField value="{!dealsRelationMap[key].buyDeals[index].amountLines[ind].Line.Reference_Number__c}" rendered="{!!dealsRelationMap[key].buyDeals[index].amountLines[ind].edit}"/>
+                                            </apex:column>
+                                            <apex:column headerValue="FF Invoice">
+                                            </apex:column>
+                                            <apex:column headerValue="Amount">
+                                                <apex:inputField value="{!dealsRelationMap[key].buyDeals[index].amountLines[ind].Line.Amount__c}"  rendered="{!dealsRelationMap[key].buyDeals[index].amountLines[ind].editAmt}"  required="true"/>
+                                                <apex:outputField value="{!dealsRelationMap[key].buyDeals[index].amountLines[ind].Line.Amount__c}" rendered="{!!dealsRelationMap[key].buyDeals[index].amountLines[ind].editAmt}"/>
+                                                <apex:facet name="footer"><apex:outputText value="{0,number,###,###,##0.00}"><apex:param value="{!dealsRelationMap[key].buyDeals[index].totalAmount}"/></apex:outputText></apex:facet>
+                                            </apex:column>
+                                            <apex:column headerValue="Quantity">
+                                                <apex:facet name="footer"><apex:outputText value="{0,number,###,###,##0.000}"><apex:param value="{!dealsRelationMap[key].buyDeals[index].totalQuantity}"/></apex:outputText></apex:facet>
+                                                <apex:outputField value="{!dealsRelationMap[key].buyDeals[index].amountLines[ind].Line.Quontity__c}" rendered="{!!dealsRelationMap[key].buyDeals[index].amountLines[ind].editQuant}"/>
+                                                <apex:inputField value="{!dealsRelationMap[key].buyDeals[index].amountLines[ind].Line.Quontity__c}"  rendered="{!dealsRelationMap[key].buyDeals[index].amountLines[ind].editQuant}"  required="true">
+                                                    <apex:actionSupport event="onchange" status="blockUI" reRender="mainBlock" action="{!calcAmountLinesAction}">
+                                                        <apex:param name="p1" value="{!key}" assignTo="{!selectedSellInd}"/>
+                                                        <apex:param name="p2" value="{!index}" assignTo="{!selectedBuyInd}"/>
+                                                    </apex:actionSupport>
+                                                </apex:inputField>
+                                            </apex:column>
+                                            <apex:column headerValue="Date">
+                                                <apex:inputField value="{!dealsRelationMap[key].buyDeals[index].amountLines[ind].Line.Date__c}"  rendered="{!dealsRelationMap[key].buyDeals[index].amountLines[ind].edit}"/>
+                                                <apex:outputField value="{!dealsRelationMap[key].buyDeals[index].amountLines[ind].Line.Date__c}" rendered="{!!dealsRelationMap[key].buyDeals[index].amountLines[ind].edit}"/>
+                                            </apex:column>
+                                            <apex:column headerValue="Action">
+                                            </apex:column>
+                                        </apex:pageBlockTable>
+                                    
+                                	</apex:pageBlockSection>
+                                    <apex:pageBlockButtons location="bottom" style="text-align:right">
+                                        <apex:commandButton value="Save" status="blockUI" reRender="mainBlock" action="{!saveDealAction}" rendered="{!dealsRelationMap[key].buyDeals[index].saveEnabled}">
+                                            <apex:param name="p1" value="{!key}" assignTo="{!selectedSellInd}"/>
+                                            <apex:param name="p2" value="{!index}" assignTo="{!selectedBuyInd}"/>
+                                        </apex:commandButton>
+                                        <apex:commandButton value="Add Volune line" status="blockUI" reRender="mainBlock" action="{!addLineAction}" rendered="{!!dealsRelationMap[key].buyDeals[index].finalExists}">
+                                            <apex:param name="p1" value="{!key}" assignTo="{!selectedSellInd}"/>
+                                            <apex:param name="p2" value="{!index}" assignTo="{!selectedBuyInd}"/>
+                                        </apex:commandButton>
+                                        <apex:commandButton value="Add Final Invoice" status="blockUI" reRender="mainBlock" action="{!addFinalLineAction}" rendered="{!!dealsRelationMap[key].buyDeals[index].finalExists}">
+                                            <apex:param name="p1" value="{!key}" assignTo="{!selectedSellInd}"/>
+                                            <apex:param name="p2" value="{!index}" assignTo="{!selectedBuyInd}"/>
+                                        </apex:commandButton>
+                                    </apex:pageBlockButtons>
+                                </apex:pageBlock>
+                            </div>
+                        </apex:repeat>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="3">
+                    </td>
+                </tr>
+            </table>           
+            <table style="width:100%">
+            	<tr>
+                    <td></td>
+                    <td style="width:600px">
+                        <apex:pageBlock mode="edit">
+                            <apex:pageBlockTable value="{!dealsRelationMap[key].BalanceSheet}" var="row">
+                                <apex:column headerValue="Deal" >
+                                    <apex:outputLabel >{!row.DealName}</apex:outputLabel>
+                                    <apex:facet name="footer">Balance:</apex:facet>
+                                </apex:column>
+                                <apex:column headerValue="Quantity">
+                                    <apex:outputText value="{0,number,###,###,##0.000}"><apex:param value="{!row.quantity}"/></apex:outputText>
+                                </apex:column>
+                                <apex:column headerValue="Final Price">
+                                    <apex:outputText value="{0,number,###,###,##0.00}"><apex:param value="{!row.finalPrice}"/></apex:outputText>
+                                </apex:column>
+                                <apex:column headerValue="Amount">
+                                    <apex:outputText value="{0,number,###,###,##0.00}"><apex:param value="{!row.amount}"/></apex:outputText>
+                                    <apex:facet name="footer"><apex:outputText value="{0,number,###,###,##0.00}"><apex:param value="{!dealsRelationMap[key].balance}"/></apex:outputText></apex:facet>
+                                </apex:column>
+                            </apex:pageBlockTable>
+                        </apex:pageBlock>
+                    </td>
+                    <td></td>
+                </tr>
+            </table>
+        </apex:repeat>
+    </apex:outputPanel>
+</apex:form> 
+    
+</apex:page>

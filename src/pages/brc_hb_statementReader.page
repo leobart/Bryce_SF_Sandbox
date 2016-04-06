@@ -1,0 +1,205 @@
+<apex:page controller="BRC_HB_ReaderController">
+
+    <apex:includeScript value="{!URLFOR($Resource.JQuery)}"/>  
+    <apex:includeScript value="{!URLFOR($Resource.JQueryBlockUI)}"/>  
+    <apex:includeScript value="{!URLFOR($Resource.BlockUIConfig)}"/>    
+    
+<script>
+    $j = jQuery.noConflict();
+    
+    function setFocusOnLoad(){}
+    
+    var rowId;
+    var blocked = false;
+    
+    function openWindow(url, divId){
+        rowId = divId;
+        var width = 680;
+        var height = 650;
+		mWin = window.open( url, '', 'width=' + width + 
+                           			',height=' + height + 
+                           			',left=' + ((window.innerWidth - width)/2) + 
+                           			',top=' + ((window.innerHeight - height)/2) );
+        block();       
+        showProcessedRow();
+        setTimeout(function () {
+            if (mWin.closed && !mWin.complete){
+                unblock();
+            }else{
+                setTimeout(arguments.callee, 10);
+            }
+        }, 10);
+    }
+    
+    function showProcessedRow(){
+		if(blocked) $j("[id=" + rowId + "]").parent().parent().children().addClass( "processedCell" ); 
+    }
+    
+    function hideProcessedRow(){
+    	$j("[id=" + rowId + "]").parent().parent().children().removeClass("processedCell");
+    }
+   
+    function openMatchingToolWindow(cshId, divId){
+		var url = '/apex/ffc_CEMatchingToolPage?Id=' + cshId;
+        openWindow(url, divId);
+    }
+    function openCreateCEWindow(parameters, divId){
+        var url = '/apex/rietumuELCreateCEPage?' + parameters;
+        openWindow(url, divId);
+    }
+    function updateAction(csh, trn, chargeTrn){
+        updateTrnAndUnblock();
+    }
+    function updateAllAction(){
+        updateTrnList();        
+    }
+    function unblock(){
+        blocked = false;
+    	hideProcessedRow();
+        unblockPage();
+    }
+    function block(){
+        blocked = true;
+        blockPage();
+    }
+</script>
+
+    
+<style>
+    .actionLink{
+        color:#015ba7;
+        text-decoration: none;
+    }
+    .actionLink:hover{
+        color:#015ba7;
+        text-decoration: underline;
+    }
+    .createCECell, .matchedCell, .processedCell, .commonCell{
+    	height: 56px;
+    }
+    
+    .commonCell{
+    	background:#FFFFF7;
+    }
+    
+    .matchedCell{
+    	background:#FFFFFF;
+    }
+    
+    .createCECell{
+    	background:#F7FDF7;
+    }
+    
+    .processedCell{
+    	background:#FFEAA9;
+    }
+    
+    .clsCenter{
+		text-align:center;
+    }
+    
+    body .pbBody table.list tr.headerRow td, body .pbBody table.list tr.headerRow th 
+    {
+        background: #FFFFFF;
+        border-width: 0 0 1px 1px;
+        border-color: #B9B9B9;
+        color: #000;
+        font-size: 1.1em;
+        font-weight: bold;
+        padding: 5px 2px 4px 5px;
+        height: 20px;
+        /* background: linear-gradient(#EEEDEB,#EEEDEC); */
+        border-width: 0px 0px 3px 0px;
+    }  
+    body .bRelatedList .pbBody table.list, body .apexp .pbBody table.list {
+	    border: 0px solid #e0e3e5;
+    }
+    
+    .errorConsole .x-grid3-row-over, body .pbBody table.list tr.dataRow.highlight td, body .pbBody table.list tr.dataRow.highlight th {
+    	background-color: #FDF7E4;
+    }
+</style>
+    
+    <apex:form >
+    	<apex:image url="{!$Resource.brc_hb_ReaderLogo}" style="margin-bottom: 20px; margin-top: 15px;" />
+        <apex:pageMessages />
+        <apex:actionFunction action="{!updateSCHForTransactionsAction}" name="updateTrnList" reRender="transactionsBlock" oncomplete="showProcessedRow();" />
+        <apex:actionFunction action="{!updateSCHForTransactionsAction}" name="updateTrnAndUnblock" reRender="transactionsBlock" oncomplete="unblock();" />
+        <apex:actionStatus onstart="blockPage()" onstop="unblockPage()" id="blockUI"/>
+        
+        <apex:outputPanel rendered="{!errorMessage==null}"  >
+            <table style="margin-bottom:15px">
+                <tr>
+                    <td style="vertical-align: middle">
+                        <apex:outputLabel >Компания:</apex:outputLabel>
+                    </td>
+                    <td style="vertical-align: middle; font-weight: bold; font-size:11pt">
+                        <apex:outputLabel style="margin-left:10px">{!statement.bankAccount.c2g__OwnerCompany__r.Name}</apex:outputLabel>
+                    </td>
+                    <td width="40px"/>
+                    <td style="vertical-align: middle">
+                        <apex:outputLabel >Банковский эккаунт:</apex:outputLabel>
+                    </td>
+                    <td style="vertical-align: middle; font-weight: bold;">
+                        <span style="margin-left:10px"><apex:outputField style="font-size:10pt" value="{!cashEntry.c2g__BankAccount__c}" /></span>
+                    </td>
+                    <td width="40px"/>
+                    <td style="vertical-align: middle">
+                        <apex:outputLabel >Валюта:</apex:outputLabel>
+                    </td>
+                    <td style="vertical-align: middle;font-weight: bold; font-size:10pt">
+                        <apex:outputLabel style="margin-left:10px">{!statement.currencyCode}</apex:outputLabel>
+                    </td>
+                    <td width="40px"/>
+                    <td style="vertical-align: middle">
+                        <apex:outputLabel >Период:</apex:outputLabel>
+                    </td>
+                    <td style="vertical-align: middle; font-weight: bold; font-size:10pt">
+                        <apex:outputLabel style="margin-left:10px">{!statement.datesInterval}</apex:outputLabel>
+                    </td>
+                    <td width="40px"/>
+                    <td>
+                        <apex:commandButton value="Загрузить другую выписку" action="{!downloadDocPageAction}" />
+                    </td>
+                </tr>
+            </table>
+        </apex:outputPanel>
+        <apex:pageblock id="transactionsBlock" mode="maindetail" rendered="{!errorMessage==null}">
+              <apex:pageBlockTable value="{!statement.transactions}" var="trans" width="100%">
+                  <apex:column headerValue="Дата" style="width:80px" styleClass="{!trans.cssClass}" >
+                      <div id="{!trans.uniqueId}" />
+                      <apex:outputText value="{!trans.formatDate}"/>
+                  </apex:column>
+                  <apex:column headerValue="Идентификатор транзакции" width="95px" value="{!trans.trnId}" styleClass="{!trans.cssClass}"/>
+                  <apex:column headerValue="Контрагент" width="210px" value="{!trans.contractorName}" styleClass="{!trans.cssClass}"/>
+                  <!--apex:column headerValue="Валюта" width="120px" headerClass="clsCenter" styleClass="{!trans.cssClass}" style="text-align:center">{!trans.currencyCode}</apex:column-->
+                  <apex:column headerValue="Сумма" width="95px" styleClass="{!trans.cssClass}">
+                      <c:brc_currencyField value="{!trans.value}" currencyCode="{!trans.currencyCode}"/>
+                  </apex:column>
+                   <apex:column headerValue="Комиссия Банка" width="95px" styleClass="{!trans.cssClass}">
+                       <c:brc_currencyField value="{!trans.charge}" currencyCode="{!trans.currencyCode}"/>
+                  </apex:column>
+                   <apex:column headerValue="Баланс" width="95px" styleClass="{!trans.cssClass}">
+                       <c:brc_currencyField value="{!trans.balance}" currencyCode="{!trans.currencyCode}"/>
+                  </apex:column>
+                  <apex:column headerValue="Cash Entry" width="95px" headerClass="clsCenter" styleClass="{!trans.cssClass}" style="text-align:center" >
+                       <apex:outputPanel >
+                          <apex:commandButton value="Create"
+                                              onclick="openCreateCEWindow('{!trans.parameters}', '{!trans.uniqueId}')"
+                                              rendered="{!trans.cashEntry == null}" reRender="nothing">
+                          <apex:param name="p1" value="{!trans.uniqueId}" assignTo="{!selectedTransactionId}"/>
+                          </apex:commandButton>
+                          <apex:outputLink value="/{!trans.cashEntry.Id}" target="_blank" rendered="{!trans.cashEntry != null}">{!trans.cashEntry.Name}</apex:outputLink>
+                      </apex:outputPanel>
+                  </apex:column>
+                  <apex:column headerValue="Matched" headerClass="clsCenter" styleClass="{!trans.cssClass}" style="text-align:center"  width="105px">
+                      <apex:image url="{!$Resource.selected_ico}" style="width:10px;" rendered="{!trans.matched}"/>
+                      <apex:commandButton value="Matching Tool"
+                                          onclick="openMatchingToolWindow('{!trans.cashEntry.Id}', '{!trans.uniqueId}')"
+                                          rendered="{!!trans.matched && trans.cashEntry !=null}"
+                                          reRender="nothing" />
+                  </apex:column>
+              </apex:pageBlockTable>           
+        </apex:pageblock>
+    </apex:form>
+</apex:page>

@@ -1,0 +1,99 @@
+<apex:page controller="RietumuELCreateCEController" sidebar="false" showHeader="false" tabStyle="c2g__codaTransactionLineItem__c">
+    
+    <apex:includeScript value="{!URLFOR($Resource.JQuery)}"/>  
+    <apex:includeScript value="{!URLFOR($Resource.JQueryBlockUI)}"/>  
+    <apex:includeScript value="{!URLFOR($Resource.BlockUIConfig)}"/>
+
+    <script>
+        var isClicked = false;
+    	var buttonPressed = false;
+    	var complete = false;
+        function checkDoubleSubmit(obj){
+        	if (isClicked) {
+            	return false;
+            }else {
+            	isClicked = true;
+                buttonPressed = true;
+                blockPage();
+                $j("[id*='CmdBtnGrp']").addClass("btnDisabled");
+                $j("[id*='CmdBtnGrp']").val("Processing...");
+                return true;
+            }
+        }
+        function cancelAction() {
+            window.opener.unblock();
+            complete = true;
+            window.top.close();
+        }
+    	function completeAction(csh, trn, chargeTrn){
+            unblockPage();
+            var cashentryId = document.getElementById(csh).value;
+            var transactionId = document.getElementById(trn).value;
+            var chargeTransactionId = document.getElementById(chargeTrn).value;
+            if(cashentryId != ''){
+                buttonPressed = true;
+                window.opener.updateAction(cashentryId, transactionId, chargeTransactionId);
+                complete = true;
+                window.top.close();
+            }
+        }
+    </script>
+	<style>
+        body, html {
+            background: linear-gradient(to top, #FFFFFF, #E4F8EA);
+            height: 100%;        
+        }
+        body .bPageBlock, body .secondaryPalette.bPageBlock, body .individualPalette .secondaryPalette.bPageBlock {
+			background-color: #f8f8f8;
+			border-color: #A7C39F;
+			-moz-border-radius: 4px;
+			-webkit-border-radius: 10px;
+			border-radius: 4px;
+			box-shadow: 0px 1px 6px rgba(0, 0, 0, 0.16);
+        }
+    </style>
+    <apex:form >
+		<apex:sectionHeader title="Импорт банковской транзакции" subtitle="Создание Cash Entry" />
+        <apex:actionStatus onstart="blockPage()" onstop="unblockPage()" id="blockUI"/>
+        <div style="padding-left:10px;padding-right:10px">
+            
+            <apex:pageBlock title="New Cash Entry" id="commonBlock" mode="edit">
+                <apex:pageBlockButtons location="bottom">
+                    <apex:commandButton id="CreateCmdBtnGrp" value="Create" action="{!createCashEntry}"
+                                        oncomplete="completeAction('{!$Component.cshId}','{!$Component.trnId}','{!$Component.chargeTrnId}')"
+                                        rendered="{!noInitErrors}" reRender="commonBlock" status="blockUI" />     
+                    <apex:commandButton id="MatchCmdBtnGrp" action="{!createAndMatchAction}" value="Create & Match" onclick="return checkDoubleSubmit()" rendered="{!noInitErrors}"/>     
+                    <apex:commandButton id="CancelCmdBtnGrp" value="Cancel" immediate="true" onclick="cancelAction();" />     
+                </apex:pageBlockButtons>
+                <apex:pageMessages />
+         		<apex:inputHidden id="cshId" value="{!cashEntryId}"/>
+         		<apex:inputHidden id="trnId" value="{!trnId}"/>
+         		<apex:inputHidden id="chargeTrnId" value="{!chargeTrnId}"/>
+                
+                <apex:pageBlockSection title="Details" rendered="{!noInitErrors}">
+                    <apex:inputField value="{!cashEntry.c2g__Account__c}" required="true"/>
+                    <apex:outputField value="{!cashEntry.c2g__BankAccount__c}"/>
+                    <apex:outputField value="{!cashEntry.c2g__ChargesGLA__c}"/>
+                    <apex:outputField value="{!cashEntry.c2g__CashEntryCurrency__c}"/>
+                    <apex:outputField value="{!cashEntry.c2g__Date__c}"/>
+                    <apex:outputField value="{!cashEntry.c2g__Period__c}"/>
+                    <apex:outputField value="{!cashEntry.c2g__PaymentMethod__c}"/>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel >Type:</apex:outputLabel>
+                        <apex:inputField value="{!cashEntry.c2g__Type__c}">
+                        	<apex:actionSupport event="onchange" action="{!updateChargesValue}" reRender="chargesField, netField" status="blockUI" />
+                        </apex:inputField>                        
+                    </apex:pageBlockSectionItem>
+                    <apex:outputField value="{!cashEntry.c2g__Value__c}"/>
+                    <apex:outputField value="{!cashEntry.c2g__TotalCharges__c}" id="chargesField"/>
+                    <apex:outputField value="{!cashEntry.c2g__NetValue__c}" id="netField"/>
+                </apex:pageBlockSection>
+                
+                <apex:pageBlockSection title="Description" columns="1" rendered="{!noInitErrors}">
+                    <apex:inputTextarea value="{!cashEntry.c2g__Description__c}" style="width: 460px; height: 62px;"/>
+                </apex:pageBlockSection>
+                                
+            </apex:pageBlock>           
+        </div>
+    </apex:form>
+</apex:page>

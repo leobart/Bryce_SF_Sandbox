@@ -1,0 +1,18 @@
+<apex:page controller="BRC_HB_ReaderController">
+    <apex:form >
+    	<apex:image url="{!$Resource.brc_hb_ReaderLogo}" style="margin-bottom: 20px; margin-top: 15px;" />
+        <apex:pageMessages />
+        <apex:outputPanel >
+            <table width="100%">
+                <tr>
+                    <td style="vertical-align: middle; width: 300px; font-weight: bold;">
+                        <apex:inputFile value="{!fileBody}" accept="text/plain" />
+                    </td>
+                    <td>
+                        <apex:commandButton value="Загрузить выписку" action="{!viewStatementPageAction}" />
+                    </td>
+                </tr>
+            </table>
+        </apex:outputPanel>
+    </apex:form>
+</apex:page>

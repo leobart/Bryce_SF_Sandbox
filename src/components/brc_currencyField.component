@@ -1,0 +1,5 @@
+<apex:component controller="BRC_CR_CurrencyFieldComponentController" >
+    <apex:attribute name="value" type="Decimal" required="true"  description="Value" assignTo="{!sourceValue}"/>
+    <apex:attribute name="currencyCode" type="String" required="true"  description="Currency Code"  assignTo="{!currencyId}"/>
+    <apex:outputText >{!formattedValue}</apex:outputText>
+</apex:component>

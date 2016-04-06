@@ -1,0 +1,74 @@
+<apex:page controller="DPDistributionController">
+    <apex:form >
+        <apex:pageBlock title="Distributions of delivery documents for plan: {!deliveryPlan.name}">
+            <table>
+                <tr>
+                    <td>
+                        <apex:outputLabel >Distributions for which type of Delivery Document you would like to view: </apex:outputLabel>
+                    </td>
+                    <td>
+                        <apex:selectList size="1" value="{!groupType}">
+                            <apex:selectOptions value="{!docTypeSL}" />
+                            <apex:actionSupport event="onchange" action="{!updateDistributionsList}"/>
+                        </apex:selectList>
+                    </td>
+                </tr>
+            </table>
+        </apex:pageBlock>
+        
+        <apex:pageBlock id="distributionsTable" title="Distributions List" rendered="{!(distributionsListSize > 0)}">
+            <apex:repeat value="{!dpDocDistributions}" var="distribution">
+                <apex:pageBlockTable value="{!distribution.dRows}" var="dRow">
+                    <apex:facet name="header">
+                        <apex:outputPanel >
+                            <span>
+                                <apex:outputLabel >{!groupType} Document: {!distribution.distributionDoc.Name}</apex:outputLabel>
+                            </span>
+                            <span style="padding-left:20px">
+                            	<apex:outputLabel style="margin-right:6px">Volume:</apex:outputLabel>
+                                <apex:outputField value="{!distribution.distributionDoc.Planned_volume__c}"/>
+                            </span>
+                            <span style="padding-left:20px">
+                            	<apex:outputLabel style="margin-right:6px">Balance:</apex:outputLabel>
+                                <apex:outputLabel value="{!(distribution.distributionDoc.Planned_volume__c - distribution.summary)}"/>
+                            </span>
+                             <span style="padding-left:20px">
+                             	<apex:commandLink action="{!addDistributionRow}">
+                                	<apex:image url="{!$Resource.plus_image2}" />                                             
+                                    <apex:param name="p1" value="{!distribution.distributionDoc.Id}" assignTo="{!currentDocId}"/>
+                                </apex:commandLink>
+                            </span>
+                        </apex:outputPanel>
+                    </apex:facet>
+                    <apex:column headerValue="Buy document:" rendered="{!groupType='Sell'}">
+                        <apex:selectList size="1" value="{!dRow.documentId}" rendered="{!dRow.edit}">
+                            <apex:selectOptions value="{!documentSL}" />
+                        </apex:selectList>
+                        <apex:outputField value="{!dRow.distribution.Buy_Document__c}" rendered="{!NOT(dRow.edit)}"/> 
+                    </apex:column>
+                    <apex:column headerValue="Sell document:" rendered="{!groupType='Buy'}">
+                        <apex:selectList size="1" value="{!dRow.documentId}" rendered="{!dRow.edit}">
+                            <apex:selectOptions value="{!documentSL}" />
+                        </apex:selectList>
+                        <apex:outputField value="{!dRow.distribution.Sell_Document__c}" rendered="{!NOT(dRow.edit)}"/> 
+                    </apex:column>
+                    <apex:column headerValue="Volume:" >
+                        <apex:inputField value="{!dRow.distribution.Volume__c}" rendered="{!dRow.edit}">
+                            <apex:actionSupport event="onchange" reRender="distributionsTable"/>
+                        </apex:inputField>                         
+                        <apex:outputField value="{!dRow.distribution.Volume__c}" rendered="{!NOT(dRow.edit)}"/> 
+                    </apex:column>
+                    <apex:facet name="footer">
+                        <apex:outputLabel >
+                            <apex:outputPanel >
+                            	<apex:outputLabel style="margin-right:6px">Summary:</apex:outputLabel>
+                                <apex:outputLabel value="{!distribution.summary}"/>                                
+                            </apex:outputPanel>
+                        </apex:outputLabel>
+                    </apex:facet>
+                </apex:pageBlockTable>
+            </apex:repeat>
+        </apex:pageBlock>
+    </apex:form>
+   
+</apex:page>

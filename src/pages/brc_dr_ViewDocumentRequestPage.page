@@ -1,0 +1,61 @@
+<apex:page standardController="BRC_DR_Document_Request__c" extensions="BRC_DR_DocumentRequestController" >
+    <apex:form >
+        <apex:sectionHeader title="Заявка на создание юр. документа" subtitle="{!dr.Name}"/>
+        <apex:pageBlock mode="maindetail">
+            <apex:pageBlockButtons >
+                <apex:commandButton value="Discard" action="{!discardAction}" rendered="{!dr.Status__c!='Discarded' && dr.Status__c!='Complete'}" />
+                <apex:commandButton value="Edit" action="{!edit}" rendered="{!dr.Status__c!='Discarded' && dr.Status__c!='Complete'}"/>
+            </apex:pageBlockButtons>
+            <apex:pageBlockSection title="Основное">
+                <apex:outputField value="{!dr.Document_Request_Pattern__c}"/>
+                <apex:outputField value="{!dr.CreatedById}"/>
+                <apex:outputField value="{!dr.Package__c}"/>
+            </apex:pageBlockSection>            
+            <apex:pageBlockSection title="Статус">
+                <apex:outputField value="{!dr.Status__c}" />
+                <apex:outputField value="{!dr.Due_Date__c}" />
+                <apex:outputField value="{!dr.Complete_Date__c}" rendered="{!dr.Status__c=='Complete'}" />
+                <apex:outputField value="{!dr.Approved__c}"/>
+            </apex:pageBlockSection>            
+            <apex:pageBlockSection title="Параметры Заявки" columns="2">
+                <apex:repeat value="{!wLines}" var="wLine">
+                    <apex:pageBlockSectionItem rendered="{!wLine.drLine.Type__c == 'Pick List'}">
+                        <apex:outputLabel >{!wLine.drLine.Name}</apex:outputLabel>
+                        <apex:outputfield value="{!wLine.drLine.Text__c}"/>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem rendered="{!wLine.drLine.Type__c == 'Text'}">
+                        <apex:outputLabel >{!wLine.drLine.Name}</apex:outputLabel>
+                        <apex:outputField value="{!wLine.drLine.Text__c}"/>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem rendered="{!wLine.drLine.Type__c == 'Text Area'}">
+                        <apex:outputLabel >{!wLine.drLine.Name}</apex:outputLabel>
+                        <apex:outputField value="{!wLine.drLine.Text_Area__c}"/>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem rendered="{!wLine.drLine.Type__c == 'Text Area Long'}">
+                        <apex:outputLabel >{!wLine.drLine.Name}</apex:outputLabel>
+                        <apex:outputField value="{!wLine.drLine.Text_Area_Long__c}"/>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem rendered="{!wLine.drLine.Type__c == 'Number'}">
+                        <apex:outputLabel >{!wLine.drLine.Name}</apex:outputLabel>
+                        <apex:outputField value="{!wLine.drLine.Number__c}"/>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem rendered="{!wLine.drLine.Type__c == 'Price'}">
+                        <apex:outputLabel >{!wLine.drLine.Name}</apex:outputLabel>
+                        <apex:outputField value="{!wLine.drLine.Price__c}"/>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem rendered="{!wLine.drLine.Type__c == 'Date'}">
+                        <apex:outputLabel >{!wLine.drLine.Name}</apex:outputLabel>
+                        <apex:outputField value="{!wLine.drLine.Date__c}"/>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem rendered="{!wLine.drLine.Type__c == 'URL'}">
+                        <apex:outputLabel >{!wLine.drLine.Name}</apex:outputLabel>
+                        <apex:outputLink value="{!wLine.drLine.Text_Area__c}" target="_blank">{!wLine.drLine.Text__c}</apex:outputLink>
+                    </apex:pageBlockSectionItem>
+                </apex:repeat>
+            </apex:pageBlockSection>
+    	</apex:pageBlock>
+    </apex:form>
+    <apex:relatedList list="ProcessSteps"/>
+    <apex:relatedList list="Documents_For_Approval__r" />
+	<apex:relatedList list="CombinedAttachments" />
+</apex:page>

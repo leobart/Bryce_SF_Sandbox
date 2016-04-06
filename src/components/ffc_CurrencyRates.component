@@ -1,0 +1,21 @@
+<apex:component controller="FFC_CurrencyRatesController">
+    <apex:attribute name="crm" type="FFC_CurrencyRatesManager" required="true" description="CR Manager" assignTo="{!crManager}" />
+    <apex:pageBlock title="Used Rates" mode="edit" id="commonPanel" rendered="{!showRatesComponent}">
+    	<apex:pageBlockSection >
+        	<apex:repeat value="{!crManager.ratesMap}" var="key" >
+            	<apex:pageBlockSectionItem >
+                	<apex:outputLabel >{!crManager.ratesMap[key].fullRateName} ({!crManager.ratesMap[key].name})</apex:outputLabel>
+                    <apex:outputPanel >
+                        <apex:actionregion >
+                          	<apex:inputField value="{!crManager.ratesMap[key].rate.c2g__Rate__c}" required="true" rendered="{!crManager.ratesMap[key].editable}">
+                             	<apex:actionSupport event="onchange" reRender="commonPanel" action="{!recalculateRates}" status="blockUI"/>
+                            </apex:inputField>
+                        </apex:actionregion>
+                        <apex:outputField value="{!crManager.ratesMap[key].rate.c2g__Rate__c}" rendered="{!!crManager.ratesMap[key].editable}"/>
+                    </apex:outputPanel>
+                </apex:pageBlockSectionItem>
+            </apex:repeat>
+        </apex:pageBlockSection>
+        <br/>
+    </apex:pageBlock>
+</apex:component>

@@ -1,0 +1,47 @@
+<apex:page controller="FFC_CancelTransactionController">
+    <apex:includeScript value="{!URLFOR($Resource.JQuery)}"/>  
+    <apex:includeScript value="{!URLFOR($Resource.JQueryBlockUI)}"/>  
+    <apex:includeScript value="{!URLFOR($Resource.BlockUIConfig)}"/>
+    <script>
+        $j = jQuery.noConflict();
+        var isClicked = false;
+    
+        function checkDoubleSubmit(){
+        	if (isClicked) {
+            	return false;
+            }else {
+            	isClicked = true;
+                blockPage();
+                $j("[id*='BtnGrp']").addClass("btnDisabled");
+                $j("[id*='BtnGrp']").val("Processing...");
+                return true;
+            }
+        }    
+    </script>
+    
+    <apex:form >
+		<apex:sectionHeader title="Отмена транзакции (нейтрализация)" subtitle="{!objectName}" />
+        <apex:pageMessages />
+        <apex:actionStatus onstart="blockPage()" onstop="unblockPage()" id="blockUI"/>
+        <apex:pageBlock rendered="{!!cancelAvailable}" mode="maindetail">
+            <apex:pageBlockButtons location="top">
+                <apex:commandButton value="Cancel" action="{!cancelAction}" />
+                <apex:commandButton value="Cash Matching" action="{!cashMatchingaction}" rendered="{!objectTransaction!=null}"/>
+            </apex:pageBlockButtons>
+        </apex:pageBlock>
+        <apex:pageBlock rendered="{!cancelAvailable}">
+            <apex:pageBlockButtons location="bottom">
+                <apex:commandButton id="cancelBtnGrp" value="Comeback" action="{!cancelAction}" />
+                <apex:commandButton id="submitBtnGrp" value="Cancel Transaction" action="{!cencelTransactionAction}" onclick="return checkDoubleSubmit()"/>
+            </apex:pageBlockButtons>
+            <br/><br/>
+            <apex:pageBlockSection >
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel >Введите причину по которой отменяете транзакцию:</apex:outputLabel>
+                    <apex:inputTextarea value="{!cancelDescription}" style="width: 300px"/>
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+        <br/>
+    </apex:form>
+</apex:page>

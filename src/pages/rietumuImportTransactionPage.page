@@ -1,0 +1,85 @@
+<apex:page controller="RietumuELController" sidebar="false">
+    
+    <script>
+       var isClicked = false;
+        function checkDoubleSubmit(obj){
+        	if (isClicked) {
+            	return false;
+            }else {
+            	isClicked = true;
+                obj.className = 'btnDisabled';
+                obj.value = 'Creating...';
+                return true;
+            }
+        }	
+    </script>
+
+    <apex:form >
+        <apex:pageBlock title="Tansaction Import" >
+            <apex:pageBlockButtons location="bottom">
+                <apex:commandButton value="Create" action="{!createCashEntry}" onclick="return checkDoubleSubmit(this)" rendered="{!errorMessage == ''}"/>     
+                <apex:commandButton value="Cancel" action="{!transactionsViewerPage}" immediate="true"/>     
+            </apex:pageBlockButtons>
+            <apex:pageMessages />
+            <apex:outputPanel rendered="{!errorMessage == ''}"  >
+                <h1>Cash Entry:</h1>
+                <br/>
+                <table>
+                    <tr>
+                        <td width="180px">Bank account:</td>
+                        <td><apex:outputField value="{!cashEntry.c2g__BankAccount__c}"/></td>
+                    </tr>
+                    <tr>
+                        <td>Cash Entry Currency:</td>
+                        <td><apex:outputField value="{!cashEntry.c2g__CashEntryCurrency__c}"/></td>
+                    </tr>
+                    <tr>
+                        <td>Description (max 255 characters):</td>
+                        <td><apex:inputTextarea value="{!cashEntry.c2g__Description__c}" rows="3" cols="85" /></td>
+                    </tr>
+                    <tr>
+                        <td>Date:</td>
+                        <td><apex:outputField value="{!cashEntry.c2g__Date__c}"/></td>
+                    </tr>
+                    <tr>
+                        <td>Period:</td>
+                        <td><apex:outputField value="{!cashEntry.c2g__Period__c}"/></td>
+                    </tr>
+                    <tr>
+                        <td>Payment method:</td>
+                        <td><apex:outputField value="{!cashEntry.c2g__PaymentMethod__c}"/></td>
+                    </tr>
+                    <tr>
+                        <td>Type:</td>
+                        <td>
+                            <apex:inputField value="{!cashEntry.c2g__Type__c}">
+                                <apex:actionSupport event="onchange" action="{!updateChargesValue}" reRender="chargesField, netField"/>
+                            </apex:inputField> 
+                        </td>
+                    </tr>
+                    <!-- line item fields -->
+                     <tr>
+                        <td>Account:</td>
+                        <td><apex:inputField value="{!cashEntry.c2g__Account__c}"/><span style="margin-left:10px">(Beneficiary Name: {!rules.transaction.benname})</span></td>
+                    </tr>
+                    <tr>
+                        <td>Bank Charges GLA:</td>
+                        <td><apex:outputField value="{!cashEntry.c2g__ChargesGLA__c}"/></td>
+                    </tr>
+                    <tr>
+                        <td>Value:</td>
+                        <td><apex:outputField value="{!cashEntry.c2g__Value__c}"/></td>
+                    </tr>
+                    <tr>
+                        <td>Total Charges:</td>
+                        <td><apex:outputField value="{!cashEntry.c2g__TotalCharges__c}" id="chargesField"/></td>
+                    </tr>
+                    <tr>
+                        <td>Net Value:</td>
+                        <td><apex:outputLabel value="{!netVal}" id="netField"/></td>
+                    </tr>
+                </table>
+             </apex:outputPanel>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

@@ -1,0 +1,212 @@
+<apex:component controller="BRC_MT_CreatePINsController">
+    <apex:attribute name="pinMapAttr" type="BRC_MT_PINMap" required="true" assignTo="{!pinMap}" description="PIN data map"/>
+    <apex:outputPanel id="fullPage">
+        <apex:pageMessages ></apex:pageMessages>
+        <apex:repeat value="{!pinMap.invoicesMap}" var="num">
+            <apex:pageBlock title="New Payable Invoice №{!num}" mode="edit">
+                <apex:facet name="header">
+                    <apex:outputPanel >
+                        <table style="width:100%; margin: 5px">
+                            <tr>
+                                <td>
+                                    <div style="margin-left: 10px; font-size:11pt; font-weight:bold">{!pinMap.invoicesMap[num].invoiceName} №{!num}</div>
+                                </td>
+                                <td>
+                                    <div>
+                                        <apex:actionRegion >
+                                            <apex:inputCheckbox value="{!pinMap.invoicesMap[num].useCreatedPIN}">    
+                                                <apex:actionSupport event="onchange" reRender="fullPage"  status="blockUI" action="{!calculateTaxesAction}">
+                                                    <apex:param name="p1" value="{!num}" assignTo="{!invoiceId}"/>
+                                                </apex:actionSupport>
+                                            </apex:inputCheckbox>
+                                        </apex:actionRegion>
+                                        Use Created Invoice
+                                    </div>
+                				</td>
+                                <td style="text-align: end; padding-right: 10px;display:{IF(pinMap.invoicesMap[num].useCreatedPIN,'none','')}">
+                                    <apex:commandButton value="Add Expense Line" style="margin-right:10px" action="{!addExpenseLineAction}" reRender="fullPage" status="blockUI" rendered="{!!pinMap.invoicesMap[num].useCreatedPIN}">
+                                        <apex:param name="p1" value="{!num}" assignTo="{!invoiceId}"/>
+                                    </apex:commandButton>
+                                    <apex:commandButton value="Add Product Line" style="margin-right:10px" action="{!addProductLineAction}" reRender="fullPage" status="blockUI" rendered="{!!pinMap.invoicesMap[num].useCreatedPIN}">
+                                        <apex:param name="p1" value="{!num}" assignTo="{!invoiceId}"/>
+                                    </apex:commandButton>
+                                    <apex:actionRegion >
+                                    	<apex:commandButton value="Delete Invoice" action="{!deleteInvoiceAction}" rendered="{!pinMap.showDeleteInvoice}" reRender="fullPage"  status="blockUI">
+                                        	<apex:param name="p1" value="{!num}" assignTo="{!invoiceId}"/>
+                                        </apex:commandButton>
+                                    </apex:actionRegion>
+                                </td>
+                            </tr>
+                        </table>
+                    </apex:outputPanel>
+                </apex:facet>
+                <apex:pageBlockSection title="Invoice Number" columns="1" rendered="{!pinMap.invoicesMap[num].useCreatedPIN}">
+                    <apex:inputField value="{!pinMap.invoicesMap[num].invoiceLink.c2g__PurchaseInvoice__c}" required="true">
+                        <apex:actionSupport event="onchange" action="{!readChoosedInvoiceData}" reRender="fullPage" status="blockUI">
+                            <apex:param name="p1" value="{!num}" assignTo="{!invoiceId}"/>
+                        </apex:actionSupport>
+                    </apex:inputField> 
+                </apex:pageBlockSection>
+                <apex:pageBlockSection title="Invoice Detail" columns="2" collapsible="true" rendered="{!!pinMap.invoicesMap[num].useCreatedPIN}">
+                    <apex:outputField value="{!pinMap.invoicesMap[num].pin.c2g__Account__c}" />
+                    <apex:inputField value="{!pinMap.invoicesMap[num].pin.c2g__InvoiceDate__c}" required="true"/>
+                    
+                    <apex:inputField value="{!pinMap.invoicesMap[num].pin.c2g__AccountInvoiceNumber__c}" required="true"/>                                                        
+                    <apex:inputField value="{!pinMap.invoicesMap[num].pin.c2g__DueDate__c}" required="true"/>
+                    
+                    <apex:outputField value="{!pinMap.invoicesMap[num].pin.c2g__InvoiceCurrency__c}"/>                                   
+                    <apex:inputField value="{!pinMap.invoicesMap[num].pin.c2g__Period__c}" required="true"/>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel >Show additional data:</apex:outputLabel>
+                        <apex:actionRegion >
+                            <apex:inputCheckbox value="{!pinMap.invoicesMap[num].showAdditionalData}">
+                                <apex:actionSupport event="onchange" reRender="fullPage" status="blockUI" />
+                            </apex:inputCheckbox>
+                        </apex:actionRegion>
+                    </apex:pageBlockSectionItem>    
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel >Add Note:</apex:outputLabel>
+                        <apex:actionRegion >
+                            <apex:inputCheckbox value="{!pinMap.invoicesMap[num].addNote}">
+                                <apex:actionSupport event="onchange" reRender="fullPage" status="blockUI" />
+                            </apex:inputCheckbox>
+                        </apex:actionRegion>
+                    </apex:pageBlockSectionItem>    
+                </apex:pageBlockSection>
+                
+                <apex:pageBlockSection title="Desctiption" columns="1" rendered="{!!pinMap.invoicesMap[num].useCreatedPIN}" >
+                    <apex:inputField value="{!pinMap.invoicesMap[num].pin.c2g__InvoiceDescription__c}" style="width: 460px; height: 62px;"/>
+                </apex:pageBlockSection>
+                
+                <apex:pageBlockSection title="Additional Data" columns="2" collapsible="true" rendered="{!pinMap.invoicesMap[num].showAdditionalData &&! pinMap.invoicesMap[num].useCreatedPIN}">                   
+                    <apex:inputField value="{!pinMap.invoicesMap[num].pin.Contract_number__c}"/>
+                    <apex:inputField value="{!pinMap.invoicesMap[num].pin.c2g__Dimension1__c}" />
+                    
+                    <apex:inputField value="{!pinMap.invoicesMap[num].pin.Addendum_Name__c}" />
+                    <apex:inputField value="{!pinMap.invoicesMap[num].pin.c2g__Dimension2__c}" />
+                    
+                    <apex:inputField value="{!pinMap.invoicesMap[num].pin.c2g__Reference1__c}"/>
+                    <apex:inputField value="{!pinMap.invoicesMap[num].pin.c2g__Dimension3__c}"/>
+                    
+                    <apex:inputField value="{!pinMap.invoicesMap[num].pin.c2g__Reference2__c}"/>
+                    <apex:inputField value="{!pinMap.invoicesMap[num].pin.c2g__Dimension4__c}" />
+                </apex:pageBlockSection>
+                
+                <apex:pageBlockSection title="Product Lines" columns="1" rendered="{!pinMap.invoicesMap[num].visibleProductsLines &&! pinMap.invoicesMap[num].useCreatedPIN}">
+                    <apex:outputPanel >
+                        <apex:pageBlockTable value="{!pinMap.invoicesMap[num].productsMap}" var="key">
+                            <apex:column headerValue="Product">
+                                <apex:inputField value="{!pinMap.invoicesMap[num].productsMap[key].c2g__Product__c}" required="true" />
+                            </apex:column>
+                            <apex:column headerValue="Price">
+                                <apex:inputField value="{!pinMap.invoicesMap[num].productsMap[key].c2g__UnitPrice__c}">
+                                    <apex:actionSupport event="onchange" action="{!calculateTaxesAction}" reRender="fullPage" status="blockUI">
+                                        <apex:param name="p1" value="{!num}" assignTo="{!invoiceId}"/>
+                                    </apex:actionSupport>
+                                </apex:inputField>
+                            </apex:column>
+                            <apex:column headerValue="Input VAT Code">
+                                <apex:inputField value="{!pinMap.invoicesMap[num].productsMap[key].c2g__InputVATCode__c}">
+                                    <apex:actionSupport event="onchange" action="{!calculateTaxesAction}" reRender="fullPage" status="blockUI">
+                                        <apex:param name="p1" value="{!num}" assignTo="{!invoiceId}"/>
+                                    </apex:actionSupport>
+                                </apex:inputField>
+                            </apex:column>
+                            <apex:column headerValue="Tax value">
+                                <apex:outputField value="{!pinMap.invoicesMap[num].productsMap[key].c2g__TaxValue1__c}"/>
+                            </apex:column>
+                            <apex:column >
+                                <apex:actionRegion >
+                                    <apex:commandButton value="Delete" action="{!deleteProductAction}" reRender="fullPage" status="blockUI">
+                                        <apex:param name="p1" value="{!num}" assignTo="{!invoiceId}"/>
+                                        <apex:param name="p2" value="{!key}" assignTo="{!lineId}"/>
+                                    </apex:commandButton>
+                                </apex:actionRegion>
+                            </apex:column>
+                        </apex:pageBlockTable>
+                    </apex:outputPanel>
+                </apex:pageBlockSection>
+                
+                <apex:pageBlockSection title="Expense Lines" columns="1" rendered="{!pinMap.invoicesMap[num].visibleExpensesLines &&! pinMap.invoicesMap[num].useCreatedPIN}">
+                    <apex:outputPanel >
+                        <apex:pageBlockTable value="{!pinMap.invoicesMap[num].expensesMap}" var="key">
+                            <apex:column headerValue="General Ledger Account">
+                                <apex:inputField value="{!pinMap.invoicesMap[num].expensesMap[key].c2g__GeneralLedgerAccount__c}" required="true" />
+                            </apex:column>
+                            <apex:column headerValue="Net Value">
+                                <apex:inputField value="{!pinMap.invoicesMap[num].expensesMap[key].c2g__NetValue__c}">
+                                    <apex:actionSupport event="onchange" action="{!calculateTaxesAction}" reRender="fullPage" status="blockUI">
+                                        <apex:param name="p1" value="{!num}" assignTo="{!invoiceId}"/>
+                                    </apex:actionSupport>
+                                </apex:inputField>
+                            </apex:column>
+                            <apex:column headerValue="Input VAT Code">
+                                <apex:inputField value="{!pinMap.invoicesMap[num].expensesMap[key].c2g__InputVATCode__c}">
+                                    <apex:actionSupport event="onchange" action="{!calculateTaxesAction}" reRender="fullPage" status="blockUI">
+                                        <apex:param name="p1" value="{!num}" assignTo="{!invoiceId}"/>
+                                    </apex:actionSupport>
+                                </apex:inputField>
+                            </apex:column>
+                            <apex:column headerValue="Tax Value">
+                                <apex:outputField value="{!pinMap.invoicesMap[num].expensesMap[key].c2g__TaxValue1__c}"/>
+                            </apex:column>
+                            <apex:column >
+                                <apex:actionRegion >
+                                    <apex:commandButton value="Delete" action="{!deleteExpenseAction}" reRender="fullPage" status="blockUI">
+                                        <apex:param name="p1" value="{!num}" assignTo="{!invoiceId}"/>
+                                        <apex:param name="p2" value="{!key}" assignTo="{!lineId}"/>
+                                    </apex:commandButton>
+                                </apex:actionRegion>
+                            </apex:column>
+                        </apex:pageBlockTable>
+                    </apex:outputPanel>
+                </apex:pageBlockSection>
+                
+                <apex:pageBlockSection title="Add Note" columns="1" rendered="{!pinMap.invoicesMap[num].addNote} &&! pinMap.invoicesMap[num].useCreatedPIN">
+                    <apex:inputField value="{!pinMap.invoicesMap[num].pinNote.Title}"/>
+                    <apex:inputTextarea value="{!pinMap.invoicesMap[num].pinNote.Body}" style="width: 460px; height: 62px;" required="true" />
+                </apex:pageBlockSection>
+                
+                <apex:pageBlockSection title="Summary" columns="2" id="summarySection" rendered="{!pinMap.invoicesMap[num].showSummary}">
+                   <apex:pageBlockSectionItem >
+                        <apex:outputLabel >Summary Net Total:</apex:outputLabel>
+                        <apex:outputText value="{0,number,###,###,##0.00}"><apex:param value="{!pinMap.invoicesMap[num].netTotal}"/></apex:outputText>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel >Summary Tax Total:</apex:outputLabel>
+                        <apex:outputText value="{0,number,###,###,##0.00}"><apex:param value="{!pinMap.invoicesMap[num].taxTotal}"/></apex:outputText>
+                    </apex:pageBlockSectionItem>
+                    <apex:outputLabel />
+                    <apex:pageBlockSectionItem >
+                        <apex:outputLabel style="font-weight:bold">Invoice Total:</apex:outputLabel>
+                        <apex:outputText value="{0,number,###,###,##0.00}" style="font-weight:bold"><apex:param value="{!pinMap.invoicesMap[num].invoiceTotal}"/></apex:outputText>
+                    </apex:pageBlockSectionItem>
+                </apex:pageBlockSection> 
+                <div style="height:15px"/>
+            </apex:pageBlock>        
+        </apex:repeat>
+        <apex:outputPanel >
+            <table style="width:100%">
+                <tr>
+                    <td>
+                        <apex:outputLabel style="margin-right: 10px">Invoices Summary:</apex:outputLabel>
+                        <apex:outputLabel style="font-weight:bold">{!pinMap.invoicesSummary}</apex:outputLabel>
+                    </td>
+                    <td>
+                        <apex:outputLabel style="margin-right: 10px">Cash Entry Value:</apex:outputLabel>
+                        <apex:outputLabel style="font-weight:bold">{!pinMap.sourceCashEntry.c2g__Value__c}</apex:outputLabel>
+                    </td>
+                    <td>
+                        <apex:outputLabel style="margin-right: 10px">Balance:</apex:outputLabel>
+                        <apex:outputLabel style="font-weight:bold">{!pinMap.balance}</apex:outputLabel>
+                    </td>
+                    <td style="text-align: end">
+                        <apex:actionRegion >
+                         	<apex:commandButton value="Add Invoice" action="{!addPINAction}" reRender="fullPage" status="blockUI"/>
+                        </apex:actionRegion>
+                    </td>
+                </tr>
+            </table>           
+        </apex:outputPanel>
+    </apex:outputPanel>
+</apex:component>

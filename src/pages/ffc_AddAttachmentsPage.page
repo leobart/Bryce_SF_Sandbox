@@ -1,0 +1,31 @@
+<apex:page standardController="Attachment" extensions="FFC_AddAttachmentsController" >
+    <apex:includeScript value="{!URLFOR($Resource.JQuery)}"/>  
+    <apex:includeScript value="{!URLFOR($Resource.JQueryBlockUI)}"/>  
+    <apex:includeScript value="{!URLFOR($Resource.BlockUIConfig)}"/>
+    <script>
+    	$j = jQuery.noConflict();
+    	var isClicked = false;
+        function checkDoubleSubmit(){
+        	if (isClicked) {
+            	return false;
+            }else {
+            	isClicked = true;
+                blockPage();
+                $j("[id*='CmdBtnGrp']").addClass("btnDisabled");
+                $j("[id*='CmdBtnGrp']").val("Processing...");
+                return true;
+            }
+        }
+    </script>
+    <apex:form >
+        <apex:sectionHeader title="Attachment for" subtitle="{!objName}" />
+        <apex:pageBlock title="Add Attachment for : {!objName}">
+            <apex:pageMessages />
+            <apex:pageBlockButtons >
+                <apex:commandButton id="AddCmdBtnGrp" value="Add" action="{!addAttachmentAction}" onclick="return checkDoubleSubmit()"/>
+                <apex:commandButton id="CancelCmdBtnGrp" value="Skip" action="{!skipAttachmentAction}" />               
+            </apex:pageBlockButtons>
+            <apex:inputfile value="{!attachment.body}" filename="{!attachment.name}" ></apex:inputfile>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

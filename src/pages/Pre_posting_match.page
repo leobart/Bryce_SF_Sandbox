@@ -1,0 +1,19 @@
+<apex:page >
+<apex:form >
+ <apex:pageBlock >
+     <apex:pageBlockButtons >
+         <apex:commandButton action="{!}" value="Retrieve"/>
+         <apex:commandButton action="{!}" value="Commit"/>
+     </apex:pageBlockButtons>
+     <string>
+         Time period for Cash Entries for 
+     </string><br/>
+     <span>
+         <apex:outputLabel value="From" for="fromDate"/>
+         <apex:inputText id="fromDate" onFocus="DatePicker.pickDate(true, '{!$Component.fromDate}', false)"/>
+         <apex:outputLabel value="To" for="toDate"/>
+         <apex:inputText id="toDate" onFocus="DatePicker.pickDate(true, '{!$Component.toDate}', false)"/>
+    </span>
+ </apex:pageBlock>
+</apex:form>
+</apex:page>

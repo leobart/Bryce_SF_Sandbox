@@ -1,0 +1,63 @@
+<apex:page controller="BRC_MR_MRWeeklyUpdateController" tabstyle="Weekly_Update__tab">
+    
+    <apex:includeScript value="{!URLFOR($Resource.JQuery)}"/>  
+    <apex:includeScript value="{!URLFOR($Resource.JQueryBlockUI)}"/>  
+    <apex:includeScript value="{!URLFOR($Resource.BlockUIConfig)}"/>
+    
+	<apex:stylesheet value="{!$Resource.brc_mr_treeItemsStyle}"/>
+    
+    <style>
+        .dateFormat{
+        	display:none; 
+        }
+    </style>
+    
+    <script>
+        function setFocusOnLoad() {} 
+    </script>
+    
+    <apex:form >
+        <apex:actionStatus onstart="blockPage()" onstop="unblockPage()" id="blockUI"/>  
+        <apex:outputPanel id="mainBlock">
+        <div style="margin-bottom: 60px; margin-left: 30px; margin-top: 10px">
+            <apex:sectionHeader title="Еженедельный отчет" subtitle="Обновление данных"/>
+            <div class="reportWidth">
+                <apex:pageMessages />
+            </div>
+            
+            <table class="reportWidth" style="margin-bottom: 30px">
+                <tr>
+                    <td style="width:10px">
+                    	<apex:commandButton value="<<" style="width: 50px;" reRender="mainBlock" status="blockUI" action="{!prevWeekAction}"  />
+                    </td>
+                    <td style="width:10px">
+                        <apex:inputField value="{!dayOfWeek.Date__c}" styleClass="dateSelector">
+                            <apex:actionSupport event="onchange" reRender="mainBlock" status="blockUI" action="{!dateChangeAction}"/>
+                        </apex:inputField>
+                    </td>
+                    <td style="width:10px">
+                    	<apex:commandButton value=">>" style="margin-left:10px; width: 50px" reRender="mainBlock" status="blockUI" action="{!nextWeekAction}"/>
+                    </td>
+                    <td>
+                        <apex:outputPanel rendered="{!isSuperUser && !tree.mondayDateRootItem.isEmptyChilds}">
+                            <apex:inputCheckbox value="{!viewAllMode}" style="margin: 5px 10px 0px 86px;">
+                                <apex:actionSupport event="onchange" reRender="mainBlock" status="blockUI" action="{!viewAllAction}"/>
+                            </apex:inputCheckbox>
+                            <apex:outputLabel >Показать все пункты отчета</apex:outputLabel>
+                        </apex:outputPanel>
+                    </td>
+                    <td style="text-align: right">
+	                    <apex:commandButton value="Edit" style="width: 50px" rendered="{!!editMode && tree.mondayDateRootItem.editAvailable}"  reRender="mainBlock" status="blockUI" action="{!editAction}"/>
+                        <apex:commandButton value="Save" style="margin-left:10px; width: 50px" rendered="{!editMode || tree.mondayDateRootItem.saveAvailable}"  reRender="mainBlock" status="blockUI" action="{!saveAction}"/>
+                        <apex:commandButton value="Cancel" style="margin-left:10px; width: 50px" rendered="{!editMode}"  reRender="mainBlock" status="blockUI" action="{!cancelAction}"/>
+                    </td>
+                </tr>
+                
+            </table>
+            <c:brc_mr_SummaryTable table="{!tree.summaryTable}" rendered="{!viewAllMode}"/>
+            <c:BRC_CR_Rates converter="{!tree.rateConverter}" rendered="{!!tree.mondayDateRootItem.isEmptyChilds}"/>
+            <c:brc_mr_items_tree itemsTree="{!tree}" editMode="{!editMode}"  showGroupValues="true"/>
+        </div>
+        </apex:outputPanel>
+    </apex:form>
+</apex:page>

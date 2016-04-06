@@ -1,0 +1,164 @@
+<apex:page tabStyle="c2g__codaTransaction__c" controller="FFC_CEMatchingToolResultController"
+           sidebar="false" showHeader="false">
+    
+    <apex:includeScript value="{!URLFOR($Resource.JQuery)}"/>  
+    <apex:includeScript value="{!URLFOR($Resource.JQueryBlockUI)}"/>  
+    <apex:includeScript value="{!URLFOR($Resource.BlockUIConfig)}"/>
+    <apex:includeScript value="{!URLFOR($Resource.EndWindowSession)}"/>
+    
+    <script>
+    	var buttonPressed = false;
+    	var updated = false;
+    	var complete = false;
+    	$j = jQuery.noConflict();
+		$j(document).ready(function() {
+            updated = true;
+            try{
+                wireUpEvents();
+                window.opener.postMessage("refresh","*");
+                window.opener.updateAllAction();  
+  			}catch(e){
+			}            
+        });
+    
+    	function closeAction(){
+            try{
+               buttonPressed = true; 
+               complete = true;
+               window.opener.postMessage("unblock","*");
+               window.opener.unblock(); 
+  			}catch(e){
+			}
+            window.close();
+        }   
+    
+        /*end session processing: */        
+        function endSession() {
+          closeAction();
+        }
+    </script>
+    <style>
+        .entityCell{
+            background: #4DA9CC;
+            padding: 15px;
+            border: solid;
+            border-color: #F5F5F5;
+        	border-width: 2px;
+            border-radius: 20px;
+            font-weight: bold;
+            box-shadow: 1px 1px 7px rgba(0, 0, 0, 0.2); 
+        	text-align: center;
+        }
+        .linkClass:link, .linkClass:visited, .linkClass:active {
+            color: #FFFFFF;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 12pt;
+            text-decoration: blink;        
+        }
+        .linkClass:hover{
+            color: #F7F7F7;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 12pt;
+            text-decoration: underline;
+        }
+        .smallText{
+            color: #F7F7F7;
+            font-size: 8pt;
+        }
+        .imgStyle{
+        	width:16px;
+        	opacity: 0.75;
+        }
+        body,html {
+            background: linear-gradient(to top, #FFFFFF, #E4F4F8);
+            height: 100%;        
+        }
+        body .bPageBlock, 
+        body #bodyCell .bResource .secondaryPalette, 
+        body .secondaryPalette.bPageBlock, 
+        body .individualPalette .secondaryPalette.bPageBlock, 
+        body .bodyDiv .genericTable, 
+        body .genericPageBlockTable, 
+        body .bodyDiv .bSubBlock, 
+        body .bComponentBlock .bPageBlock, 
+        body .bMyDashboard .bPageBlock, 
+        body.rlHoverFrame .bPageBlock, 
+        body.subjectSelectionPopup div.choicesBox, 
+        body.lookupTab .secondaryPalette.bPageBlock, 
+        body.popupTab .secondaryPalette.bPageBlock, 
+        body.UserTagStatsPage .secondaryPalette.bPageBlock {
+			background-color: #f8f8f8;
+			border-bottom: 1px solid #C5C5C5;
+			border-left: 1px solid #C5C5C5;
+			border-right: 1px solid #C5C5C5;
+			-moz-border-radius: 4px;
+			-webkit-border-radius: 10px;
+			border-radius: 4px;
+			box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.15);
+        }
+    </style>
+	<apex:sectionHeader title="Cash Entry Matching Tool Results" subtitle="{!$CurrentPage.parameters.cshName}"  />
+    <apex:form >
+        <div style="padding-left:10px;padding-right:10px">
+            <apex:pageBlock mode="edit">
+                <apex:pageMessages />
+                <apex:pageBlockSection title="Matching Result" columns="1">
+                    <apex:outputPanel >
+                    <table style="margin:40px; margin-left:135px;">
+                        <tr>
+                            <td>
+                                <div class="entityCell">
+                                    <div class="smallText">
+                                        Source Cash Entry:
+                                    </div>
+                                    <apex:outputLink styleClass="linkClass" value="/{!$CurrentPage.parameters.cshId}" target="_blank">{!$CurrentPage.parameters.cshName}</apex:outputLink>                       
+                                </div>
+                            </td>
+                            <td style="vertical-align:bottom"><apex:image styleClass="imgStyle" url="{!$Resource.down_right_arc_arrow}"/></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: center;vertical-align: middle"><apex:image styleClass="imgStyle" url="{!$Resource.down_arrow}"/></td>
+                            <td></td>
+                            <td>
+                                <div class="entityCell">
+                                    <div class="smallText">
+                                        matching reference:
+                                    </div>
+                                    <apex:outputLink styleClass="linkClass" value="/{!$CurrentPage.parameters.mrId}" target="_blank">{!$CurrentPage.parameters.mrName}</apex:outputLink>                       
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="entityCell">
+                                    <div class="smallText">
+                                        Created Entity:
+                                    </div>
+                                    <apex:outputLink styleClass="linkClass" value="/{!$CurrentPage.parameters.eId}" target="_blank">{!$CurrentPage.parameters.eName}</apex:outputLink>                       
+                                </div>
+                            </td>
+                            <td><apex:image styleClass="imgStyle" url="{!$Resource.up_right_arc_arrow}"/></td>
+                            <td></td>
+                        </tr>
+                    </table>
+                    </apex:outputPanel>
+                </apex:pageBlockSection>
+                <apex:pageBlockSection title="Entity Attachments:" rendered="{!showAttachmentTable}" columns="1">
+                    <apex:pageBlockTable value="{!attList}" var="att">
+                        <apex:column headerValue="Attachment name" value="{!att.Name}"/>
+                    </apex:pageBlockTable>
+                </apex:pageBlockSection>
+                <apex:pageBlockSection title="Add Attachment" columns="1" rendered="{!!showAttachmentTable}">
+                    <apex:inputfile value="{!attachment.body}" filename="{!attachment.name}" ></apex:inputfile>
+                </apex:pageBlockSection>
+                <apex:pageBlockButtons location="bottom">
+                    <span style="margin-left: 80px;"/>
+                    <apex:commandButton value="Add" action="{!addAttachmentAction}" rendered="{!!showAttachmentTable}" />
+                    <apex:commandButton value="Close" onclick="closeAction()" />
+                </apex:pageBlockButtons>
+                
+            </apex:pageBlock>
+        </div>
+    </apex:form>    
+</apex:page>

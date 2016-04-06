@@ -1,0 +1,82 @@
+<apex:page standardController="BRC_DR_Document_Request__c" extensions="BRC_DR_DocumentRequestController">
+    <apex:includeScript value="{!URLFOR($Resource.JQuery)}"/>  
+    <apex:includeScript value="{!URLFOR($Resource.JQueryBlockUI)}"/>  
+    <apex:includeScript value="{!URLFOR($Resource.BlockUIConfig)}"/>
+    <apex:includeScript value="{!URLFOR($Resource.CheckDoubleSubmit)}"/>
+    <apex:form >
+        <apex:actionStatus onstart="blockPage()" onstop="unblockPage()" id="blockUI"/>
+        <apex:pageMessages />
+        <apex:sectionHeader title="Новая Заявка" subtitle="На Создание Юридического Документа"/>
+        <apex:pageBlock id="mainblock" title="Заполните Поля" mode="edit">
+            <apex:pageBlockButtons >
+                <apex:commandButton id="saveCmdBtnGrp" value="Save" action="{!saveAction}" onclick="return checkDoubleSubmit()"/>
+                <apex:commandButton id="cancelCmdBtnGrp" value="Cancel" action="{!cancelAction}" immediate="true"/>
+            </apex:pageBlockButtons>
+            <apex:pageBlockSection title="Шаблон заявки">
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel >Шаблон заявки</apex:outputLabel>
+                    <apex:actionRegion >
+                        <apex:selectList value="{!dr.Document_Request_Pattern__c}" size="1">
+                            <apex:selectOptions value="{!patternsSO}"/>     
+                            <apex:actionSupport event="onchange" action="{!prepareRquestLines}" status="blockUI" rerender="mainblock"/>                                             
+                        </apex:selectList>
+                    </apex:actionRegion>    
+                </apex:pageBlockSectionItem>
+                <apex:inputField value="{!dr.Department__c}" required="true" />
+                <apex:inputField value="{!dr.Package__c}"/>
+                <apex:inputField value="{!dr.Due_Date__c}" required="true" />
+            </apex:pageBlockSection>
+            <apex:pageBlockSection title="Параметры Заявки" columns="2">
+                <apex:repeat value="{!wLines}" var="wLine">
+                    <apex:pageBlockSectionItem rendered="{!wLine.drLine.Type__c == 'Pick List'}">
+                        <apex:outputLabel >{!wLine.drLine.Name}</apex:outputLabel>
+                        <apex:selectList value="{!wLine.drLine.Text__c}" size="1">
+                            <apex:selectOptions value="{!wLine.pickValuesSO}"/>
+                        </apex:selectList>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem rendered="{!wLine.drLine.Type__c == 'Text'}">
+                        <apex:outputLabel >{!wLine.drLine.Name}</apex:outputLabel>
+                        <apex:inputField value="{!wLine.drLine.Text__c}" required="{!wLine.drLine.Required__c}" />
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem rendered="{!wLine.drLine.Type__c == 'Text Area'}">
+                        <apex:outputLabel >{!wLine.drLine.Name}</apex:outputLabel>
+                        <apex:inputField value="{!wLine.drLine.Text_Area__c}" required="{!wLine.drLine.Required__c}"/>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem rendered="{!wLine.drLine.Type__c == 'Text Area Long'}">
+                        <apex:outputLabel >{!wLine.drLine.Name}</apex:outputLabel>
+                        <apex:inputField value="{!wLine.drLine.Text_Area_Long__c}" required="{!wLine.drLine.Required__c}"/>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem rendered="{!wLine.drLine.Type__c == 'Number'}">
+                        <apex:outputLabel >{!wLine.drLine.Name}</apex:outputLabel>
+                        <apex:inputField value="{!wLine.drLine.Number__c}" required="{!wLine.drLine.Required__c}"/>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem rendered="{!wLine.drLine.Type__c == 'Price'}">
+                        <apex:outputLabel >{!wLine.drLine.Name}</apex:outputLabel>
+                        <apex:outputPanel style="display:flex">
+                        	<apex:inputField value="{!wLine.drLine.Price__c}" required="{!wLine.drLine.Required__c}"/>
+                        	<apex:inputField value="{!wLine.drLine.CurrencyIsoCode}" required="{!wLine.drLine.Required__c}"/>
+                        </apex:outputPanel>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem rendered="{!wLine.drLine.Type__c == 'Date'}">
+                        <apex:outputLabel >{!wLine.drLine.Name}</apex:outputLabel>
+                        <apex:inputField value="{!wLine.drLine.Date__c}" required="{!wLine.drLine.Required__c}"/>
+                    </apex:pageBlockSectionItem>
+                    <apex:pageBlockSectionItem rendered="{!wLine.drLine.Type__c == 'URL'}">
+                        <apex:outputLabel >{!wLine.drLine.Name}</apex:outputLabel>
+                        <apex:outputPanel style="display:flex">
+                            <apex:outputLabel style="width: 34px">Имя</apex:outputLabel>
+                        	<apex:inputField value="{!wLine.drLine.Text__c}" required="{!wLine.drLine.Required__c}"/>
+                            <apex:outputLabel style="width: 53px; margin-left: 14px">Ссылка</apex:outputLabel>
+                        	<apex:inputField value="{!wLine.drLine.Text_Area__c}" style="height:14px; width:190px; overflow:hidden;" required="{!wLine.drLine.Required__c}"/>
+                        </apex:outputPanel>
+                    </apex:pageBlockSectionItem>
+                </apex:repeat>
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+    </apex:form>
+
+    <script>
+    	function setFocusOnLoad(){}
+    </script>
+    
+</apex:page>

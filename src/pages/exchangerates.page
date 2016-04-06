@@ -1,0 +1,63 @@
+<apex:page Controller="bryceForexUpdate" showHeader="true" sidebar="true" standardStylesheets="false"> <!--renderAs="pdf" -->
+    <h1>Exchange rates</h1>
+    
+    <apex:pageBlock >
+        <br/>
+            Provided by European Central Bank
+        <br/>
+            Actual date: 
+        <apex:outputText value=" {0,date,dd.MM.yyyy}">
+            <apex:param value="{!date}" />
+        </apex:outputText>
+        <br/>
+        
+        <apex:pageBlockTable value="{!rateList}" var="lineItem" styleClass="boxedtable" width="50%" >
+            <apex:column >
+                <apex:facet name="header">
+                    <apex:outputPanel >Currency</apex:outputPanel>
+                </apex:facet>
+                <apex:outputText value="{!lineItem}" /> 
+            </apex:column>
+            <apex:column >
+                <apex:facet name="header">
+                <apex:outputPanel >1 EUR --> ?</apex:outputPanel>
+                </apex:facet>
+                <apex:outputText value="{0, number, #0.0000}" >
+                    <apex:param value="{!rateList[lineItem]}" />
+                </apex:outputText>
+            </apex:column>
+            <apex:column >
+                <apex:facet name="header">
+                <apex:outputPanel >1 ? --> EUR</apex:outputPanel>
+                </apex:facet>
+                <apex:outputText value="{0, number, #0.0000}" >
+                    <apex:param value="{!1/rateList[lineItem]}" />
+                </apex:outputText>
+            </apex:column>
+            <apex:column >
+                <apex:facet name="header">
+                <apex:outputPanel >Currency</apex:outputPanel>
+                </apex:facet>
+                <apex:outputText value="{!IF(lineItem='USD','EUR',lineItem)}" /> 
+            </apex:column>
+            <apex:column >
+                <apex:facet name="header">
+                    <apex:outputPanel >1 USD -> ?</apex:outputPanel>
+                </apex:facet>
+                <apex:outputText value="{0, number, #0.0000}">
+                    <apex:param value="{!IF(lineItem='USD',UsdCrossRates['EUR'],UsdCrossRates[lineItem])}" />
+                </apex:outputText>
+            </apex:column>
+            <apex:column >
+                <apex:facet name="header">
+                    <apex:outputPanel >1 ? -> USD</apex:outputPanel>
+                </apex:facet>
+                <apex:outputText value="{0, number, #0.0000}">
+                    <apex:param value="{!IF(lineItem='USD',1/UsdCrossRates['EUR'],1/UsdCrossRates[lineItem])}" />
+                </apex:outputText>
+            </apex:column>
+        </apex:pageBlockTable>
+    </apex:pageBlock> 
+    
+   
+</apex:page>

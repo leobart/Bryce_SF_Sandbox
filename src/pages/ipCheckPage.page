@@ -1,0 +1,30 @@
+<apex:page controller="IPChekController">
+    <apex:sectionHeader title="Title" subtitle="Sub title"/>
+    <apex:pageBlock title="IP check">
+        <apex:form >
+            <apex:messages />
+            <h1>{!serverResponse}</h1>
+            <apex:pageBlockSection title="page block title" columns="3" >
+                <apex:outputLabel >1xxxxxxxxxxxxx</apex:outputLabel>
+                <apex:outputLabel >2xxxxxxxxxxxxx</apex:outputLabel>
+                <apex:outputLabel >3xxxxxxxxxxxxx</apex:outputLabel>
+                <apex:outputLabel >4yyyyyyyyyyyyyy</apex:outputLabel>
+                <apex:outputLabel >5yyyyyyyyyyyyyy</apex:outputLabel>
+                <apex:outputLabel >6yyyyyyyyyyyyyy</apex:outputLabel>
+                <apex:outputLabel >7yyyyyyyyyyyyyy</apex:outputLabel>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection title="Table section">
+                <apex:pageBlockTable value="{!l}" var="row">
+                    <apex:column title="xxxx"/>
+                    <apex:column title="xxxx"/>
+                    <apex:column title="xxxx"/>
+                    <apex:column title="xxxx"/>
+                    <apex:column title="xxxx"/>
+                    <apex:column title="xxxx"/>
+                    <apex:column title="xxxx"/>
+                    <apex:column title="xxxx"/>
+                </apex:pageBlockTable>
+            </apex:pageBlockSection>
+        </apex:form>
+    </apex:pageBlock>
+</apex:page>

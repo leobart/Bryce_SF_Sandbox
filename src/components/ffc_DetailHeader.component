@@ -1,0 +1,5 @@
+<apex:component >
+    <div style="font-weight:bold; font-size: 11pt; margin-left: 3px;  margin-top: 15px; margin-bottom: 8px;">
+        <apex:componentBody />
+    </div> 
+</apex:component>

@@ -1,0 +1,23 @@
+<apex:component >
+	<apex:attribute name="table" type="BRC_MR_SummaryTable" required="true"  description="Table"/>
+    
+            <table class="reportWidth" cellspacing="0" style="margin-bottom: 30px">
+                <tr>
+                    <apex:repeat value="{!table.headers}" var="header">
+                        <td  class="sumTableHeader">{!header}</td>
+                    </apex:repeat>
+                </tr>
+                
+                <apex:repeat value="{!table.rows}" var="row">
+                    <tr>
+                        <td class="{!IF(row.summary, 'sumTableFooter', IF(row.sub, 'sumTableSubRow', 'sumTableRow'))}" style="text-align: left;{!IF(row.sub, 'padding-left:30px','')}">{!row.title}</td>
+                        <td class="{!IF(row.summary, 'sumTableFooter', IF(row.sub, 'sumTableSubRow', 'sumTableRow'))}"><c:brc_currencyField value="{!row.brcF}" currencyCode="USD"/></td>
+                        <td class="{!IF(row.summary, 'sumTableFooter', IF(row.sub, 'sumTableSubRow', 'sumTableRow'))}"><c:brc_currencyField value="{!row.brcR}" currencyCode="USD"/></td>
+                        <td class="{!IF(row.summary, 'sumTableFooter', IF(row.sub, 'sumTableSubRow', 'sumTableRow'))}"><c:brc_currencyField value="{!row.manP}" currencyCode="USD"/></td>
+                        <td class="{!IF(row.summary, 'sumTableFooter', IF(row.sub, 'sumTableSubRow', 'sumTableRow'))}" style="width: 130px"><c:brc_currencyField value="{!row.brcC}" currencyCode="USD"/></td>
+                        <td class="{!IF(row.summary, 'sumTableFooter', IF(row.sub, 'sumTableSubRow', 'sumTableRow'))}" style="width: 130px; text-align:right;"><c:brc_currencyField value="{!row.sum}" currencyCode="USD"/></td>
+                    </tr>
+                </apex:repeat>
+            </table>
+
+</apex:component>

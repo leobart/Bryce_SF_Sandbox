@@ -1,0 +1,43 @@
+<apex:component >
+    
+    <apex:attribute name="crm" type="FFC_CurrencyRatesManager" required="true" description="CR Manager"/>
+    <apex:attribute name="pInvoice" type="c2g__codaPurchaseInvoice__c" required="true" description="PIN" />
+    <apex:attribute name="pInvoiceLineItem" type="c2g__codaPurchaseInvoiceLineItem__c" required="true" description="PIN product line item"/>
+    <apex:attribute name="pInvoiceExpItem" type="c2g__codaPurchaseInvoiceExpenseLineItem__c" required="true" description="PIN exp line item"/>
+    <apex:attribute name="lineTypeSO" type="SelectOption[]" required="true" description="Line Type SO"/>
+    <apex:attribute name="lineType" type="Integer" required="true" description="Line Type"/>
+    
+    <c:ffc_CurrencyRates crm="{!crm}"/>
+    <apex:pageBlock title="New Payable Invoice" mode="edit" id="pinBlock">
+        <apex:pageBlockSection title="PIN Details">
+            <apex:outputField value="{!pInvoice.c2g__Account__c}"/>
+            <apex:inputField value="{!pInvoice.c2g__AccountInvoiceNumber__c}" required="true" />
+            <apex:inputField value="{!pInvoice.c2g__InvoiceDate__c}" required="true"/>
+            <apex:inputField value="{!pInvoice.c2g__DueDate__c}" required="true"/>
+            <apex:inputField value="{!pInvoice.c2g__Period__c}" required="true"/>
+            <apex:outputField value="{!pInvoice.c2g__InvoiceCurrency__c}"/>
+        </apex:pageBlockSection>
+        <apex:pageBlockSection title="Description" columns="1">
+            <apex:inputField value="{!pInvoice.c2g__InvoiceDescription__c}" style="width: 460px; height: 62px;" required="true"/>
+        </apex:pageBlockSection>
+        <apex:pageBlockSection title="Line">
+            <apex:pageBlockSectionItem >
+                <apex:outputLabel >Line Type:</apex:outputLabel>
+                <apex:outputPanel >
+                    <apex:actionRegion >
+                        <apex:selectList value="{!lineType}" size="1">
+                            <apex:actionSupport event="onchange" reRender="pinBlock" status="blockUI" />
+                            <apex:selectOptions value="{!lineTypeSO}"/>
+                        </apex:selectList>
+                    </apex:actionRegion>
+                </apex:outputPanel>
+            </apex:pageBlockSectionItem>
+            <apex:outputLabel ></apex:outputLabel>
+            <apex:inputField value="{!pInvoiceLineItem.c2g__Product__c}" required="true" rendered="{!lineType == 0}"/>
+            <apex:outputField value="{!pInvoiceLineItem.c2g__UnitPrice__c}" rendered="{!lineType == 0}"/>
+            <apex:inputField value="{!pInvoiceExpItem.c2g__GeneralLedgerAccount__c}" required="true" rendered="{!lineType == 1}"/>
+            <apex:outputField value="{!pInvoiceExpItem.c2g__NetValue__c}" rendered="{!lineType == 1}"/>
+            <apex:outputLabel ></apex:outputLabel>
+        </apex:pageBlockSection>
+    </apex:pageBlock>    
+</apex:component>

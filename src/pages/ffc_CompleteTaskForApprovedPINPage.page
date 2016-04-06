@@ -1,0 +1,30 @@
+<apex:page standardController="Task" extensions="FFC_CompleteTaskForApprovedPINController" >
+    <apex:form >        
+        <apex:pageBlock title="Complete Task for Approved Payable Invoice">
+            <apex:pageMessages />
+            <apex:outputPanel rendered="{!noInitErrors}">
+                <br/>
+                <h1>
+                    Payable Invoice: &nbsp; <apex:outputLink value="/{!pin.Id}" target="_blank">{!pin.Name}</apex:outputLink>
+                </h1>
+                <br/>
+                <br/>
+                <apex:outputLabel rendered="{!!emptyCashEntries}">Created Cash Entries for Payable Invoice: </apex:outputLabel>
+                <br/>
+                <table>
+                    <apex:repeat value="{!cashEntries}" var="cashEntry">
+                        <tr>
+                            <td>
+                                <apex:outputLink value="/{!cashEntry.Id}" target="_blank">{!cashEntry.Name}</apex:outputLink>
+                            </td>
+                        </tr>
+                    </apex:repeat>
+                </table>
+            </apex:outputPanel>
+            <apex:pageBlockButtons location="bottom">
+                <apex:commandButton value="Complete" rendered="{!noInitErrors && !emptyCashEntries}" action="{!complete}" />
+                <apex:commandButton value="Cancel" action="{!cancel}"/>
+            </apex:pageBlockButtons>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

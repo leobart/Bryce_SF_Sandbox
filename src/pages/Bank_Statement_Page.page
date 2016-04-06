@@ -1,0 +1,71 @@
+<apex:page controller="BankBalancesController">
+    <style>
+    #dataTable,#dataRow,#dataCell
+        {
+        border:solid black 1px;
+        border-collapse:collapse;
+        }
+    </style>
+    <apex:form >
+        <apex:pageBlock title="Bank statement">
+        	<apex:pageBlockSection id="bankAccountsPickList">
+            	<apex:selectList value="{!selectedCompany}" size="1">
+    	    		<apex:selectOptions value="{!companies}"/>
+            		<apex:actionSupport event="onchange" rerender="bankAccountsPickList"/>
+   				</apex:selectList>
+                <apex:selectList value="{!selectedBankAccount}" size="1" >
+           			<apex:selectOptions value="{!allBankAccounts}" />
+        		</apex:selectList>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection >
+        	    <apex:inputText value="{!fromDate}" label="От" id="Datefrom" onfocus="DatePicker.pickDate(true, '{!$Component.Datefrom}' , false);"/>
+                <apex:inputText value="{!toDate}" label="До" id="DateTo" onfocus="DatePicker.pickDate(true, '{!$Component.DateTo}' , false);"/>
+        		<apex:commandButton reRender="DataTable" value="Обновить"/>
+            </apex:pageBlockSection>
+        	<apex:pageBlockSection id="DataTable">
+            	<apex:dataTable value="{!bankTransactions}" var="transaction">
+                	<apex:column >
+                    	<apex:facet name="header">Дата</apex:facet>
+                        <apex:outputText value="{!transaction.Trdate}"/>
+                    </apex:column>
+                    <apex:column >
+                    	<apex:facet name="header">Контрагент</apex:facet>
+                        <apex:outputText value="{!transaction.account}"/>
+                    </apex:column>
+                    <apex:column >
+                    	<apex:facet name="header">Описание</apex:facet>
+                        <apex:outputText value=""/>
+                    </apex:column>
+                    <apex:column >
+                    	<apex:facet name="header">Сумма</apex:facet>
+                        <apex:outputText value=""/>
+                    </apex:column>
+                    <apex:column >
+                    	<apex:facet name="header">Сальдо</apex:facet>
+                        <apex:outputText value=""/>
+                    </apex:column>
+                </apex:dataTable>
+        	</apex:pageBlockSection>
+            
+            <apex:pageBlockSection >
+            	<table id="dataTable">
+                    <tr id="dataRow">
+                        <td id="dataCell">Date</td>
+                        <td>Account</td>
+                        <td>Description</td>
+                        <td>Sum</td>
+                        <td>Saldo</td>
+                    </tr>
+                   <apex:repeat value="{!dataSet}" var="daySet">
+                    	<tr>
+                   			<td>
+                       
+                    		</td> 
+                   		</tr>
+                    </apex:repeat>
+                </table>
+                
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

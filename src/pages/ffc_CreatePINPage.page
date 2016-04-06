@@ -1,0 +1,177 @@
+<apex:page standardController="c2g__codaPurchaseInvoice__c" extensions="FFC_CreatePINController" >
+    <apex:includeScript value="{!URLFOR($Resource.JQuery)}"/>  
+    <apex:includeScript value="{!URLFOR($Resource.JQueryBlockUI)}"/>  
+    <apex:includeScript value="{!URLFOR($Resource.BlockUIConfig)}"/>
+    <script>
+    	$j = jQuery.noConflict();
+    	var isClicked = false;
+        function checkDoubleSubmit(){
+        	if (isClicked) {
+            	return false;
+            }else {
+            	isClicked = true;
+                blockPage();
+                $j("[id*='CmdBtnGrp']").addClass("btnDisabled");
+                $j("[id*='CmdBtnGrp']").val("Processing...");
+                return true;
+            }
+        }
+    </script>
+    <apex:form >
+        <apex:actionStatus onstart="blockPage()" onstop="unblockPage()" id="blockUI"/>
+        <apex:sectionHeader title="Payable Invoice Edit" subtitle="New Payable Invoice Bryce Edition" />
+        <apex:pageBlock title="New Payable Invoice" mode="edit" id="fullPage">
+            <apex:pageMessages />
+            <apex:pageBlockButtons >
+                <apex:commandButton id="createCmdBtnGrp" value="Create" action="{!createPINAction}" rendered="{!noInitErrors}" onclick="return checkDoubleSubmit()" />
+                <!--apex:commandButton id="calcCmdBtnGrp" value="Recalculate Taxes" action="{!calculateTaxesAction}" rerender="fullPage" status="blockUI" /--> 
+                <apex:commandButton id="cancelCmdBtnGrp" value="Cancel" action="{!cancelAction}" immediate="true"/> 
+            </apex:pageBlockButtons>
+            <apex:actionRegion >
+                
+            <apex:pageBlockSection title="Contract & Addendum Info" columns="2" collapsible="false" rendered="{!noInitErrors}">                   
+                <apex:inputField value="{!pin.Contract_number__c}"/>
+                <apex:inputField value="{!pin.Addendum_Name__c}" />
+            </apex:pageBlockSection>
+                
+                <apex:pageBlockSection title="Account Detail" columns="2" collapsible="false" rendered="{!noInitErrors}">                   
+                	<apex:inputField value="{!pin.c2g__Account__c}" required="true">
+                    	<apex:actionSupport event="onchange" action="{!changeAccountAction}" reRender="invoiceCurrField" />
+                    </apex:inputField>
+                    <apex:inputField value="{!pin.c2g__Dimension1__c}" />
+                    <apex:outputLabel />
+                    <apex:inputField value="{!pin.c2g__Dimension2__c}" />
+                    <apex:outputLabel />
+                    <apex:inputField value="{!pin.c2g__Dimension3__c}" />
+                    <apex:outputLabel />
+                    <apex:inputField value="{!pin.c2g__Dimension4__c}" />
+                </apex:pageBlockSection>
+            </apex:actionRegion>   
+            <apex:pageBlockSection title="Invoice Detail" columns="2" collapsible="false" rendered="{!noInitErrors}">
+                <apex:inputField value="{!pin.c2g__AccountInvoiceNumber__c}" required="true"/>
+                <apex:inputField value="{!pin.Bank__c}"/>                               
+                
+                <apex:inputField value="{!pin.c2g__InvoiceDate__c}" required="true"/>
+				<apex:inputField value="{!pin.c2g__Reference1__c}"/>
+                                
+                <apex:inputField value="{!pin.c2g__DueDate__c}" required="true"/>
+                <apex:inputField value="{!pin.c2g__Reference2__c}"/>
+                
+				<apex:inputField value="{!pin.c2g__InvoiceCurrency__c}" required="true" id="invoiceCurrField" />
+                <apex:inputField value="{!pin.c2g__InvoiceDescription__c}" style="width: 300px; height: 16px;"/>
+                                
+                <apex:inputField value="{!pin.c2g__Period__c}" required="true"/>
+                <apex:outputLabel />
+            </apex:pageBlockSection>
+            
+            <apex:pageBlockSection columns="1" rendered="{!noInitErrors}">
+                <apex:facet name="header">
+                    <apex:outputPanel >
+                    	<h3>Product Lines</h3>
+                    	<apex:commandButton value="Add Line" style="margin-left:155px" action="{!addProductLineAction}" reRender="fullPage" status="blockUI"/>
+                    </apex:outputPanel>                  
+                </apex:facet>
+                <apex:outputPanel >
+                    <apex:pageBlockTable value="{!productsMap}" var="key" rendered="{!visibleProductsLines}" id="productTable">
+                        <apex:column headerValue="Product">
+                            <apex:inputField value="{!productsMap[key].c2g__Product__c}" required="true" />
+                        </apex:column>
+                        <apex:column headerValue="Description">
+                            <apex:inputField value="{!productsMap[key].c2g__LineDescription__c}" style="height: 16px;width: 350px;" />
+                        </apex:column>
+                        <apex:column headerValue="Price">
+                            <apex:inputField value="{!productsMap[key].c2g__UnitPrice__c}">
+                                <apex:actionSupport event="onchange" action="{!calculateTaxesAction}" reRender="fullPage" status="blockUI" />
+                            </apex:inputField>
+                        </apex:column>
+                        <apex:column headerValue="Input VAT Code">
+                            <apex:inputField value="{!productsMap[key].c2g__InputVATCode__c}">
+                                <apex:actionSupport event="onchange" action="{!calculateTaxesAction}" reRender="fullPage" status="blockUI" />
+                            </apex:inputField>
+                        </apex:column>
+                        <apex:column headerValue="Tax value">
+                            <apex:outputField value="{!productsMap[key].c2g__TaxValue1__c}"/>
+                        </apex:column>
+                        <apex:column >
+                            <apex:actionRegion >
+                                <apex:commandButton value="Delete" action="{!deleteProductAction}" reRender="fullPage" status="blockUI">
+                                    <apex:param name="p1" value="{!key}" assignTo="{!deleteId}"/>
+                                </apex:commandButton>
+                            </apex:actionRegion>
+                        </apex:column>
+                    </apex:pageBlockTable>
+                </apex:outputPanel>
+            </apex:pageBlockSection>
+            
+            <apex:pageBlockSection columns="1" rendered="{!noInitErrors}">
+                <apex:facet name="header">
+                    <apex:outputPanel >
+                    	<h3>Expense Lines</h3>
+                    	<apex:commandButton value="Add Line" style="margin-left:150px" action="{!addExpenseLineAction}" reRender="fullPage" status="blockUI"/>
+                    </apex:outputPanel>                  
+                </apex:facet>
+                <apex:outputPanel >
+                    <apex:pageBlockTable value="{!expensesMap}" var="key" rendered="{!visibleExpensesLines}" id="expenseTable">
+                        <apex:column headerValue="General Ledger Account">
+                            <apex:inputField value="{!expensesMap[key].c2g__GeneralLedgerAccount__c}" required="true" />
+                        </apex:column>
+                        <apex:column headerValue="Description">
+                            <apex:inputField value="{!expensesMap[key].c2g__LineDescription__c}" style="height: 16px;width: 350px;" />
+                        </apex:column>
+                        <apex:column headerValue="Net Value">
+                            <apex:inputField value="{!expensesMap[key].c2g__NetValue__c}">
+                                <apex:actionSupport event="onchange" action="{!calculateTaxesAction}" reRender="fullPage" status="blockUI" />
+                            </apex:inputField>
+                        </apex:column>
+                        <apex:column headerValue="Input VAT Code">
+                            <apex:inputField value="{!expensesMap[key].c2g__InputVATCode__c}">
+                                <apex:actionSupport event="onchange" action="{!calculateTaxesAction}" reRender="fullPage" status="blockUI"/>
+                            </apex:inputField>
+                        </apex:column>
+                        <apex:column headerValue="Tax Value">
+                            <apex:outputField value="{!expensesMap[key].c2g__TaxValue1__c}"/>
+                        </apex:column>
+                        <apex:column >
+                            <apex:actionRegion >
+                                <apex:commandButton value="Delete" action="{!deleteExpenseAction}" reRender="fullPage" status="blockUI">
+                                    <apex:param name="p1" value="{!key}" assignTo="{!deleteId}"/>
+                                </apex:commandButton>
+                            </apex:actionRegion>
+                        </apex:column>
+                    </apex:pageBlockTable>
+                </apex:outputPanel>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection title="Summary" columns="2" id="summarySection" rendered="{!noInitErrors && showSummary}">
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel >Products Net Total:</apex:outputLabel>
+                    <apex:outputText value="{0,number,###,###,##0.00}"><apex:param value="{!productsNetTotal}"/></apex:outputText>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel >Products Tax Total:</apex:outputLabel>
+                    <apex:outputText value="{0,number,###,###,##0.00}"><apex:param value="{!productsTaxTotal}"/></apex:outputText>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel >Expenses Net Total:</apex:outputLabel>
+                    <apex:outputText value="{0,number,###,###,##0.00}"><apex:param value="{!expensesNetTotal}"/></apex:outputText>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel >Expenses Tax Total:</apex:outputLabel>
+                    <apex:outputText value="{0,number,###,###,##0.00}"><apex:param value="{!expensesTaxTotal}"/></apex:outputText>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel >Summary Net Total:</apex:outputLabel>
+                    <apex:outputText value="{0,number,###,###,##0.00}"><apex:param value="{!netTotal}"/></apex:outputText>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel >Summary Tax Total:</apex:outputLabel>
+                    <apex:outputText value="{0,number,###,###,##0.00}"><apex:param value="{!taxTotal}"/></apex:outputText>
+                </apex:pageBlockSectionItem>
+                <apex:outputLabel />
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel style="font-weight:bold">Invoice Total:</apex:outputLabel>
+                    <apex:outputText value="{0,number,###,###,##0.00}" style="font-weight:bold"><apex:param value="{!invoiceTotal}"/></apex:outputText>
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>          
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

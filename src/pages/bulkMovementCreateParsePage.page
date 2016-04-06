@@ -1,0 +1,50 @@
+<apex:page controller="DeliveryPlanViewController">
+    
+    <style type="text/css">
+        .empty-column-content {
+            display: none;
+        }
+	</style>
+    
+	<apex:form >
+        <apex:pageBlock title="Bulk Movment Creation Step 2">
+            <apex:pageBlockButtons >
+                <apex:commandButton action="{!commonPage}" value="Cancel"/>
+                <apex:commandButton action="{!bulkMovementCreatePage}" value="Back"/>
+                <apex:commandButton action="{!bulkMovementCreateAction}" value="Create"/>
+            </apex:pageBlockButtons>
+            <table>
+                <tr>
+                    <td style="vertical-align: middle" width="150px"><apex:outputLabel >Choose buy document:</apex:outputLabel></td>
+                    <td >
+                        <apex:selectList size="1" style="width: 400px;" value="{!movementManager.bmcd.buyDocId}">
+                            <apex:selectOptions value="{!movementManager.bmcd.buyDocuments}"/>
+                        </apex:selectList>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle"><apex:outputLabel >Choose sell document:</apex:outputLabel></td>
+                    <td>
+                        <apex:selectList size="1" style="width: 400px;" value="{!movementManager.bmcd.sellDocId}">
+                            <apex:selectOptions value="{!movementManager.bmcd.sellDocuments}"/>
+                        </apex:selectList>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2" style="height:10px"></td>
+                </tr>
+                <tr>
+                    <td colspan="2"><apex:outputLabel >Import data:</apex:outputLabel></td>
+                </tr>
+            </table>
+            <apex:pageBlockTable value="{!movementManager.bmcd.parsedTable}" var="row">
+                <apex:repeat value="{!row}" var="col">
+                    <apex:column value="{!col}"/>
+                </apex:repeat>
+            <apex:repeat var="parameter" value="{!movementManager.bmcd.parseParams}">
+                <apex:column headerValue="{!parameter.header}" styleClass="empty-column-content" />
+            </apex:repeat>
+            </apex:pageBlockTable>
+        </apex:pageBlock>
+    </apex:form>    
+</apex:page>

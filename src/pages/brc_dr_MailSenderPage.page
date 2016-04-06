@@ -1,0 +1,35 @@
+<apex:page controller="BRC_DR_MailSenderController" >
+    <apex:includeScript value="{!URLFOR($Resource.JQuery)}"/>  
+    <apex:includeScript value="{!URLFOR($Resource.JQueryBlockUI)}"/>  
+    <apex:includeScript value="{!URLFOR($Resource.BlockUIConfig)}"/>
+    <apex:actionStatus onstart="blockPage()" onstop="unblockPage()" id="blockUI"/>
+    <apex:form >
+        <apex:sectionHeader title="Отправка на почту" subtitle="Пользователю"/>
+        
+        <apex:pageBlock id="mainBlock" title=" " mode="edit">
+            <apex:pageMessages />
+            <apex:pageBlockButtons location="bottom">
+                <apex:commandButton value="Отправить" action="{!sendMailAction}"/>
+            </apex:pageBlockButtons>
+            <apex:pageBlockSection >
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel >Выберите пользователя</apex:outputLabel>
+                    <apex:actionRegion >
+                        <apex:selectList value="{!selectedUserId}" size="1" >
+                            <apex:selectOptions value="{!usersSO}"/>
+                            <apex:actionSupport event="onchange" rerender="mainBlock" status="blockUI"/>
+                        </apex:selectList>
+                    </apex:actionRegion>                    
+                </apex:pageBlockSectionItem>
+                <apex:outputLabel />
+                <apex:outputText label="Почта" id="textField">{!mail}</apex:outputText>
+                <apex:outputLabel />
+                <apex:inputTextArea label="Описание" value="{!description}" cols="80" rows="6"/>
+                <apex:outputLabel />
+            	<apex:inputText label="Имя ссылки" value="{!name}" required="true" />
+                <apex:outputLabel />
+                <apex:inputText label="URL ссылки" value="{!url}" size="80" required="true" />
+            </apex:pageBlockSection>          
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

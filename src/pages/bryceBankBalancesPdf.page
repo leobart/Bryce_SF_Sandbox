@@ -1,0 +1,57 @@
+<apex:page Controller="bryce_BankListController" showHeader="true" sidebar="false" standardStylesheets="false" renderAs="pdf">
+    <apex:stylesheet value="{!URLFOR($Resource.c2g__coda2go,'coda2go/web/css/style.css')}"/>
+    <apex:stylesheet value="{!URLFOR($Resource.c2g__coda2go,'coda2go/web/css/codainvoiceprint.css')}"/>
+        <h1>Bank Balances:</h1>
+    <br/>
+    <apex:pageBlock >
+    <apex:pageBlockTable value="{!banks}" var="lineItem" styleClass="boxedtable" width="100%">
+        <apex:column style="{!lineItem.Style}">
+            <apex:facet name="header">
+                <apex:outputPanel >Bank</apex:outputPanel>
+            </apex:facet>
+            <apex:outputText value="{!lineItem.Name}"/>
+        </apex:column>
+        <apex:column style="{!lineItem.Style}">
+            <apex:facet name="header">
+                <apex:outputPanel >Company</apex:outputPanel>
+            </apex:facet>
+            <apex:outputText value="{!lineItem.Company}"/>
+        </apex:column>
+        <apex:column style="{!lineItem.Style}">
+            <apex:facet name="header">
+                <apex:outputPanel >Available Funds</apex:outputPanel>
+            </apex:facet>
+            <apex:outputText value="{!lineItem.Format}" rendered="{!IF(lineItem.AvailableFunds=0,false,true)}">
+                <apex:param value="{!lineItem.AvailableFunds}" />
+            </apex:outputText>
+            <apex:outputText value="  (USD {0, number, #0,000.00})" rendered="{!IF(OR(lineItem.AvailableFunds==0,lineItem.Currency=='USD'),false,true)}">
+                <apex:param value="{!lineItem.AvailableInUSD}" />
+            </apex:outputText>
+        </apex:column>
+        <apex:column style="{!lineItem.Style}">
+            <apex:facet name="header">
+                <apex:outputPanel >Blocked Funds</apex:outputPanel>
+            </apex:facet>
+            <apex:outputText value="{!lineItem.Format}" rendered="{!IF(lineItem.BlockedFunds=0,false,true)}">
+                <apex:param value="{!lineItem.BlockedFunds}" />
+            </apex:outputText>
+            <apex:outputText value="  (USD {0, number, #0,000.00})" rendered="{!IF(OR(lineItem.BlockedFunds==0,lineItem.Currency=='USD'),false,true)}">
+                <apex:param value="{!lineItem.BlockedInUSD}" />
+            </apex:outputText>
+        </apex:column>
+        
+        <apex:column style="{!lineItem.Style}">
+            <apex:facet name="header">
+                <apex:outputPanel >Total Funds</apex:outputPanel>
+            </apex:facet>
+            <apex:outputText value="{!lineItem.Format}" rendered="{!IF(lineItem.TotalFunds=0,false,true)}">
+                <apex:param value="{!lineItem.TotalFunds}" />
+            </apex:outputText>
+            <apex:outputText value="  (USD {0, number, #0,000.00})" rendered="{!IF(OR(lineItem.TotalFunds==0,lineItem.Currency=='USD'),false,true)}">
+                <apex:param value="{!lineItem.TotalInUSD}" />
+            </apex:outputText>
+        </apex:column>
+    </apex:pageBlockTable>
+    </apex:pageBlock>   
+  
+</apex:page>

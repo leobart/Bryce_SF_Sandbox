@@ -1,0 +1,43 @@
+<apex:page standardController="Pricing_formula__c">
+    {! Pricing_formula__c.Name}
+    <apex:form ><apex:pageMessages />
+	  <apex:commandButton action="{! save}" value="Сохранить" id="saveButton"/>
+   	  <apex:commandButton action="{! cancel}" value="Отменить" id="cancelButton"/>
+      <apex:pageBlock title="Формула ценообразования">
+      <apex:pageBlockSection >
+        <apex:inputField value="{! Pricing_formula__c.Name}">
+        </apex:inputField>
+        <apex:inputField value="{! Pricing_formula__c.Formula_type__c}">
+            <apex:actionSupport event="onchange" rerender="conditions"/>
+        </apex:inputField>
+       </apex:pageBlockSection>
+     </apex:pageBlock>
+<apex:outputPanel id="conditions">
+    <apex:pageBlock title="Даты ценообразования">
+      <apex:inlineEditSupport event="ondblclick"  showOnEdit="saveButton,cancelButton" hideOnEdit="editButton"/>
+        <apex:pageBlockSection rendered="{!Pricing_formula__c.Formula_type__c == 'Средняя за период'}">
+            <apex:inputField value="{! Pricing_formula__c.From__c}"/>
+            <apex:inputField value="{! Pricing_formula__c.To__c}"/>
+        </apex:pageBlockSection>
+        <apex:pageBlockSection rendered="{!Pricing_formula__c.Formula_type__c == 'Средняя вокруг события'}">
+            <apex:inputField value="{! Pricing_formula__c.Event_type__c}"/>
+            <apex:inputField value="{! Pricing_formula__c.Days_before__c}"/>
+            <apex:inputField value="{! Pricing_formula__c.Day_of_event__c}"/>
+            <apex:inputField value="{! Pricing_formula__c.Days_after__c}"/>
+            <apex:inputField value="{! Pricing_formula__c.Calendar_type__c}"/>
+        </apex:pageBlockSection>
+        <apex:pageBlockSection rendered="{!Pricing_formula__c.Formula_type__c == 'Средняя за период события'}">
+            <apex:inputField value="{! Pricing_formula__c.Months_around_event__c}"/>
+        </apex:pageBlockSection>
+    </apex:pageBlock>
+</apex:outputPanel>
+<apex:pageBlock title="Котировки">
+    <apex:pageBlockSection >
+      <apex:pageBlockTable value="{! Pricing_formula__c.Formula_line_items__r}" var="item">
+         <apex:column value="{! item.Product__c}"/>
+         <apex:column value="{! item.Basis__c}"/>
+      </apex:pageBlockTable>
+    </apex:pageBlockSection>
+</apex:pageBlock>
+</apex:form>
+</apex:page>

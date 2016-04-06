@@ -1,0 +1,55 @@
+<apex:component controller="FFC_CashEntryDetailController">
+    
+    <apex:attribute name="crm" type="FFC_CurrencyRatesManager" required="true" description="CR Manager" assignTo="{!crManager}" />
+    <apex:attribute name="ce" type="c2g__codaCashEntry__c" required="true" description="CE" assignTo="{!csh}"/>
+    <apex:attribute name="ceLineItem" type="c2g__codaCashEntryLineItem__c" required="true" description="CE line item" assignTo="{!cshItem}"/>
+    <apex:attribute name="procedureNumber" type="Integer" required="true" description="select procedure number"/>
+    <apex:attribute name="ceFrom" type="c2g__codaCashEntry__c" required="false" description="CE" />
+    
+    <apex:outputPanel id="allComponent">
+        <c:ffc_CurrencyRates crm="{!crm}"/>
+        <apex:pageBlock title="New Cash Entry ({!IF(ce.c2g__Type__c == 'Payment','списания','зачисления')})" mode="edit" id="ceBlock6" rendered="{!procedureNumber == 6}">
+            <apex:pageBlockSection title="Details">
+                <apex:outputField value="{!ce.c2g__Account__c}"/>
+                <apex:inputField value="{!ce.c2g__BankAccount__c}" required="true">
+                    <apex:actionSupport event="onchange" action="{!updateRates}" reRender="allComponent" status="blockUI" />
+                </apex:inputField>
+                <!--apex:inputField value="{!ceFrom.c2g__CashEntryCurrency__c}" style="width:200px;"/-->
+                <apex:outputField value="{!ce.c2g__Date__c}"/>
+                <apex:outputField value="{!ce.c2g__Period__c}"/>
+                <apex:outputField value="{!ce.c2g__Type__c}"/>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection title="Description" columns="1">
+                <apex:inputField value="{!ce.c2g__Description__c}" style="width:460px; height:62px;"/>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection title="Line Item">
+                <apex:inputField value="{!ceLineItem.c2g__CashEntryValue__c}" required="true">
+                    <apex:actionSupport event="onchange" action="{!updateRates}" reRender="allComponent" status="blockUI" />
+                </apex:inputField>
+                <apex:outputLabel ></apex:outputLabel>
+                <apex:outputLabel ></apex:outputLabel>
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+        
+        <apex:pageBlock title="New Cash Entry ({!IF(ce.c2g__Type__c == 'Payment','списания','зачисления')})" mode="edit" id="ceBlock7" rendered="{!procedureNumber == 7}">
+            <apex:pageBlockSection title="Details">
+                <apex:outputField value="{!ce.c2g__Account__c}"/>
+                <apex:inputField value="{!ce.c2g__BankAccount__c}" required="true"/>
+                <apex:outputField value="{!ce.c2g__Date__c}"/>
+                <!--apex:outputField value="{!ce.c2g__CashEntryCurrency__c}"/-->
+                <apex:outputField value="{!ce.c2g__Period__c}"/>
+                <apex:outputField value="{!ce.c2g__Type__c}"/>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection title="Description" columns="1">
+                <apex:inputField value="{!ce.c2g__Description__c}" style="width:460px; height:62px;"/>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection title="Line Item">
+                <apex:outputField value="{!ceLineItem.c2g__CashEntryValue__c}"/>
+                <apex:outputLabel ></apex:outputLabel>
+                <apex:outputLabel ></apex:outputLabel>
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+    
+    </apex:outputPanel>
+    
+</apex:component>

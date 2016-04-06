@@ -1,0 +1,30 @@
+<apex:component >
+    <apex:attribute name="journal" type="c2g__codaJournal__c" required="true" description="journal" />
+    <apex:attribute name="journalLineItem1" type="c2g__codaJournalLineItem__c" required="true" description="journalLI1"/>
+    <apex:attribute name="journalLineItem2" type="c2g__codaJournalLineItem__c" required="true" description="journalLI2"/>
+    <apex:attribute name="glaSelect" type="String" required="false" description="Select GLA"/>
+    <apex:pageBlock title="New Journal" mode="edit" >
+        <apex:pageBlockSection title="Journal details">
+			<apex:inputField value="{!journal.c2g__JournalDate__c}" required="true" /> 
+            <apex:inputField value="{!journal.c2g__Period__c}" required="true"/>
+            <apex:outputField value="{!journal.c2g__JournalCurrency__c}"/>
+        </apex:pageBlockSection>
+        <apex:pageBlockSection title="Description" columns="1">
+			<apex:inputField value="{!journal.c2g__JournalDescription__c}" style="width: 460px; height: 62px;" required="true" />            
+        </apex:pageBlockSection>
+        <apex:pageBlockSection title="Line 1">
+            <apex:outputField value="{!journalLineItem1.c2g__LineType__c}"/>
+            <apex:outputField value="{!journalLineItem1.c2g__Account__c}"/>
+            <apex:outputField value="{!journalLineItem1.c2g__GeneralLedgerAccount__c}"/>
+            <apex:outputField value="{!journalLineItem1.c2g__Value__c}"/>
+        </apex:pageBlockSection>
+        <apex:pageBlockSection title="Line 2">
+            <apex:outputField value="{!journalLineItem2.c2g__LineType__c}"/>
+            <apex:outputField value="{!journalLineItem2.c2g__Account__c}" rendered="{!journalLineItem2.c2g__Account__c != null}"/>
+            <apex:outputLabel rendered="{!glaSelect != null}">{!glaSelect}</apex:outputLabel>
+            <apex:inputField value="{!journalLineItem2.c2g__GeneralLedgerAccount__c}" rendered="{!glaSelect != null}" required="true" />
+            <apex:outputField value="{!journalLineItem2.c2g__GeneralLedgerAccount__c}" rendered="{!glaSelect == null}"/>
+            <apex:outputField value="{!journalLineItem2.c2g__Value__c}"/>
+        </apex:pageBlockSection>
+    </apex:pageBlock>
+</apex:component>

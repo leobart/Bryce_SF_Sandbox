@@ -1,0 +1,11 @@
+<apex:page controller="BRC_DR_MailSenderController" >
+    <apex:form >
+        <apex:sectionHeader title="Отправка на почту" subtitle="Пользователю"/>       
+        <apex:pageBlock id="mainBlock" title=" " mode="edit">
+            <apex:pageBlockButtons location="bottom">
+                <apex:commandButton value="Ok" action="{!comebackAction}"/>
+            </apex:pageBlockButtons>
+            <apex:pageMessages />
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

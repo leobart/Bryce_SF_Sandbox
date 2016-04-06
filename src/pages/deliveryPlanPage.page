@@ -1,0 +1,479 @@
+<apex:page controller="DeliveryPlanViewController">
+    
+   <apex:includeScript value="{!URLFOR($Resource.JQuery)}"/>  
+   <apex:includeScript value="{!URLFOR($Resource.JQueryBlockUI)}"/>  
+   <apex:includeScript value="{!URLFOR($Resource.BlockUIConfig)}"/>
+
+    <style>
+       .dTable {
+            border-collapse: collapse;
+            table-layout: auto;
+            width: 100%;
+            font-size: 9pt;
+            /*box-shadow: 0 0 10px rgba(0,0,0,0.5);*/
+       }
+       
+       .dCell, .dSelectedCell, .dhCell, .dhColumnCell, .dLoss, .dLocation, .dFooter, .dFullCell, .dDispTransfer, .dDelivTransfer, .dTHeader, .dDisable{ 
+           text-align: center; 
+           border: 1px solid #D6D6D6;
+        /*background: #FFFFFF;*/
+           padding:.3em 3px;
+           vertical-align: middle;
+       }
+       
+       .dhCell, .dhColumnCell, .dFooter, .dTHeader, .dDisable{ 
+            background-color:#E9E9E9;
+            font-family: 'Arial';
+            font-weight: bold;
+       }
+       
+       .dSelectedCell{           	
+            background-color: #e3f3ff;
+       }
+       
+       .dLocation{
+            background-color: #1797c0;
+            font-family: 'Arial';
+            font-weight: bold;
+       }
+
+       .dLocationFont{
+           font-size: 10pt;
+           color: #F8F8F8; 
+       }
+       
+       .dhColumnCell{
+           text-align: left;
+           max-width: 60px;
+       } 
+       
+       .dCell, .dSelectedCell, .dLoss, .dFullCell, .dDispTransfer, .dDelivTransfer{
+           font-size: 11pt;
+           padding: 1px;
+
+       }
+       
+       .dFullCell{
+           background: #E3F3D4;
+       }
+       
+       .dCompletelyMovedFont{
+           color: #1e6612;
+           font-size: 11pt;
+       }
+        
+        
+        .dDisableFont{
+            color: #969696;
+            font-size: 11pt; 
+        	font-weight: normal;
+        }
+       
+       .dLoss{
+           background: #F6EAEA;
+       }
+
+       .dLossFont{
+           color: #b6472e;
+           font-size: 10pt;
+       }
+       
+       .dDispTransfer{
+           background: #E8E8E8;
+       }
+
+       .dTransferFont{
+           color: #989898;
+           font-size: 10pt;
+       }
+       
+       .dDelivTransfer{
+           background: #EAF0FA;
+       }
+       
+       .dDelivTransferFont{
+           color: #275ea3;
+           font-size: 10pt;
+       }
+
+       .dDate{
+           color: #0066CC;
+            font-size: 10pt;
+        	font-weight:normal;
+       }
+       .dFooter{
+           background: #F0F0F0;
+           font-size: 10pt;
+       }
+       
+       .dInfoFont{
+           color: #686868;
+           font-size: 10pt;
+       }
+       
+       .dBalanceFont{
+           color: #2dad00;
+           font-size: 10pt;
+           font-weight: normal;
+       }
+       
+       .dInvisible{
+           display:none;
+       }
+       
+       .dDocumentListPanel{
+           border: 1px solid #C0C0C0;
+           background: #F5F5F5; 
+           overflow:auto;
+           height:141px; 
+           width: 560px;
+       }
+       
+       .dTHeader{
+        	border-color: #8D8D8D;
+            background: #8D8D8D;
+       }
+       
+       .dTHeaderFont{
+          color: #FFFFFF;
+
+       }
+        
+        /*body .bPageBlock, 
+        body #bodyCell .bResource .secondaryPalette, 
+        body .secondaryPalette.bPageBlock, 
+        body .individualPalette .secondaryPalette.bPageBlock, 
+        body .bodyDiv .genericTable, 
+        body .genericPageBlockTable, 
+        body .bodyDiv .bSubBlock, 
+        body .bComponentBlock .bPageBlock, 
+        body .bMyDashboard .bPageBlock, 
+        body.rlHoverFrame .bPageBlock, 
+        body.subjectSelectionPopup div.choicesBox, 
+        body.lookupTab .secondaryPalette.bPageBlock, 
+        body.popupTab .secondaryPalette.bPageBlock, 
+        body.UserTagStatsPage .secondaryPalette.bPageBlock {
+			background-color: #f8f8f8;
+			border-bottom: 1px solid #C5C5C5;
+			border-left: 1px solid #C5C5C5;
+			border-right: 1px solid #C5C5C5;
+			-moz-border-radius: 4px;
+			-webkit-border-radius: 10px;
+			border-radius: 4px;
+			box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.25);
+        }*/
+              
+    </style>
+    
+    
+    
+<script>
+function customLookup(x) {
+   var features, w = 600, h = 400;
+   var top = (screen.height - h)/2-100, left = (screen.width - w)/2;
+   if(top < 0) top = 0;
+   if(left < 0) left = 0;
+   features = 'top=' + top + ',left=' +left;
+   features += ',height=' + h + ',width=' + w + ',resizable=no, modal=yes';
+   window.open('/apex/documentSearchPage?deliveryPlanId='+'{!filter.deliveryPlanId}' + '&fieldName='+escape(x.name),'lookupWindow', features)
+}
+
+function receiveResult(e,x,y) {
+    var hidden = document.getElementById(e+'_lkid')
+    var text = document.getElementById(e)
+    hidden.value = x
+    text.value = y
+}
+        
+</script>
+
+
+
+        
+    <apex:form id="mainForm">
+      <apex:actionStatus onstart="blockPage()" onstop="unblockPage()" id="blockUI"/>  
+      <apex:outputPanel id="filterPanel">
+       <apex:pageBlock id="filterBlock" title="Filter" rendered="{!showFilter}">
+             <apex:pageBlockButtons >
+                 <apex:commandButton action="{!buildTableWithNewFilter}" value="View" reRender="mainForm"  status="blockUI" />  
+             </apex:pageBlockButtons>
+             
+             
+         <!-- FILTER PARAMETERS TABLE -->
+         <table style="margin-left:30px; margin-top:15px; margin-bottom:15px">
+             <tr>
+                 <td>
+                     <div>
+                         <apex:outputLabel value="Select plan: " for="pickList"/>
+                     </div>
+                     <div style="margin-top:5px;">
+                         <apex:selectList id="pickList" value="{!filter.deliveryPlanId}" size="1" style="width:310px">
+                             <apex:actionSupport event="onchange" action="{!updateDeliveryDocumentsList}" reRender="buyDocumentsListTable, sellDocumentsListTable, ddLink" status="blockUI"/>
+                             <apex:selectOptions value="{!filter.deliveryPlans}"/>
+                         </apex:selectList>
+                     </div>
+                                          
+                     <div style="margin-top:25px;">
+                         <apex:outputLabel value="Date limits:"/>                                      
+                     </div>
+                     <div style="margin-top:5px;">
+                         <span>
+                             <apex:outputLabel value="from:" for="startDateField"/>
+                             <apex:inputText style="width: 110px; padding-left:5px; margin-left: 5px;" id="startDateField" value="{!filter.startDateS}" onfocus="DatePicker.pickDate(true, '{!$Component.startDateField}', false);"/>                               
+                         </span>
+                         <span style="margin-left: 10px">
+                             <apex:outputLabel value="to:" for="endDateField"/>
+                             <apex:inputText style="width: 110px; padding-left:5px; margin-left: 5px;" id="endDateField" value="{!filter.endDateS}" onfocus="DatePicker.pickDate(true, '{!$Component.endDateField}', false);"/>    
+                         </span>
+                    </div>
+                  </td>
+                 <!-- ---------------------------------------- Buy Documents: ------------------------------------------ --> 
+                  <td style="padding-left:60px;"> 
+                      <div style="margin-bottom:5px;">
+                         <apex:outputLabel value="Buy document filter (contract / addendum): " for="buyDocumentsListTable"/>
+                      </div>
+                     <apex:outputPanel styleClass="dDocumentListPanel" layout="block" >
+                         <apex:pageBlockTable id="buyDocumentsListTable" value="{!filter.buyDocumentsList}" var="docItem" columnsWidth="30px, 100px, 155px, 155px, 100px">
+                             <apex:column > 
+                                 <apex:facet name="header">
+                                     <apex:inputCheckbox id="selectAllBuyDocCB" value="{!filter.selectAllBuyDocuments}" rendered="{!filter.buyDocumentsListSize>0}">
+                                         <apex:actionSupport event="onchange" action="{!selectAllBuyDocuments}" reRender="buyDocumentsListTable" status="blockUI"/>
+                                     </apex:inputCheckbox>
+                                 </apex:facet>
+                                 <apex:inputCheckbox value="{!docItem.selected}">
+                                     <apex:actionSupport event="onchange" action="{!unselectAllBuyDocuments}" reRender="selectAllBuyDocCB"/>
+                                 </apex:inputCheckbox>
+                             </apex:column>
+                             <apex:column headerValue="Name"><apex:outputLink value="/{!docItem.id}" target="_blank">{!docItem.name}</apex:outputLink></apex:column>
+                             <apex:column headerValue="Contract"  value="{!docItem.contract}"/>
+                             <apex:column headerValue="Addendum"  value="{!docItem.addendum}"/>
+                             <apex:column headerValue="Period"  value="{!docItem.period}"/>
+                         </apex:pageBlockTable>
+                     </apex:outputPanel>                                 
+                 </td>
+                 <!-- ---------------------------------------- Sell Documents: ------------------------------------------ --> 
+                 <td style="padding-left:60px;"> 
+                      <div style="margin-bottom:5px;">
+                         <apex:outputLabel value="Sell document filter (contract / addendum): " for="sellDocumentsListTable"/>
+                      </div>
+                     <apex:outputPanel styleClass="dDocumentListPanel" layout="block" >
+                         <apex:pageBlockTable id="sellDocumentsListTable" value="{!filter.sellDocumentsList}" var="docItem" columnsWidth="30px, 100px, 155px, 155px, 100px">
+                             <apex:column >                               
+                                 <apex:facet name="header">
+                                     <apex:inputCheckbox id="selectAllSellDocCB" value="{!filter.selectAllSellDocuments}" rendered="{!filter.sellDocumentsListSize>0}">
+                                         <apex:actionSupport event="onchange" action="{!selectAllSellDocuments}" reRender="sellDocumentsListTable" status="blockUI"/>
+                                     </apex:inputCheckbox>
+                                 </apex:facet>
+                                 <apex:inputCheckbox value="{!docItem.selected}">
+                                     <apex:actionSupport event="onchange" action="{!unselectAllSellDocuments}" reRender="selectAllSellDocCB"/>
+                                 </apex:inputCheckbox>
+                             </apex:column>
+                             <apex:column headerValue="Name"><apex:outputLink value="/{!docItem.id}" target="_blank">{!docItem.name}</apex:outputLink></apex:column>
+                             <apex:column headerValue="Contract"  value="{!docItem.contract}"/>
+                             <apex:column headerValue="Addendum"  value="{!docItem.addendum}"/>
+                             <apex:column headerValue="Period"  value="{!docItem.period}"/>
+                         </apex:pageBlockTable>
+                     </apex:outputPanel>                                 
+                 </td>
+                
+             </tr>
+             <tr>
+                 <td colspan="2" style="padding-top:30px">    
+                     <apex:outputPanel id="filterCBoxesPanel">
+                        <table>
+                            <tr>
+                                <td width="40px" class="dCell">
+                                    <apex:inputCheckbox value="{!filter.movementCBox}"/>
+                                </td>
+                                <td><font class="dInfoFont">Other movements</font></td>
+                                <td width="10px"/>
+                                
+                                <td width="40px" class="dFullCell">
+                                    <apex:inputCheckbox value="{!filter.completelyMovedCBox}"/>
+                                </td>
+                                <td><font class="dCompletelyMovedFont">Сompletely moved</font></td>
+                                <td width="10px"/>
+                                
+                                <td width="40px" class="dDelivTransfer">
+                                    <apex:inputCheckbox value="{!filter.delivTransferCBox}"/>
+                                </td>
+                                <td><font class="dDelivTransferFont">Delivered from another plan</font></td>
+                                <td width="10px"/>                                
+                                <td width="40px" class="dLoss">
+                                </td>
+                                <td><font class="dLossFont">Loss</font></td>
+                                <td width="10px"/>                               
+                                <td width="40px" class="dDispTransfer">
+                                </td>
+                                <td><font class="dTransferFont">Dispatched to another plan</font></td>
+                            </tr>
+                        </table>
+                     </apex:outputPanel>                 
+                 </td>
+             </tr>
+         </table>             
+       </apex:pageBlock>
+      </apex:outputPanel>
+      
+         <apex:pageBlock id="mainBlock" title="{!dpTable.name}" mode="edit" rendered="{!showTable}">
+             <apex:facet name="header">
+				<apex:outputPanel styleClass="pbHeader">
+                    <table >                   	
+                            <tr>
+                                <td class="pbTitle">
+                                    <h2 >{!dpTable.name}</h2>
+                                </td>
+                                <td class="pbButton">
+                                     <apex:commandButton action="{!createMovementsPage}" value="Create Movements"/>           
+                                     <apex:commandButton action="{!bulkMovementsCreationPage}" value="Bulk movement creation"/>
+                                     <apex:commandButton action="{!assignMDocPage}" value="Assign document"/>
+                                     <apex:commandButton action="{!deleteMovements}" value="Delete Movements" onclick="if(!confirm('Are you sure?')){return};" reRender="tablePanel" status="blockUI" />            
+                                     <apex:commandButton action="{!uncollapseAllCells}" value="Expand All" reRender="tablePanel" status="blockUI" />    
+                                     <apex:commandButton action="{!unselectAll}" value="Unselect All" reRender="tablePanel, selectedSum" status="blockUI" />    
+                                     <apex:commandButton action="{!createInvoice}" value="Create Invoice"/> 
+                                     <apex:commandButton action="{!filterSwitch}" id="filterHideShowBtn" value="{!IF(showFilter,'Hide Filter','Show Filter')}" reRender="filterPanel, filterHideShowBtn"/>
+                                    <span style="float:right;">
+                                        <div class="dCell" style="width:35px; margin-left:20px; float:left;">
+                                            <apex:inputCheckbox value="{!dpTable.filter.movementCBox}">
+                                                <apex:actionSupport event="onchange" action="{!buildTableWithCurrFilter}" reRender="tablePanel" status="blockUI"/>
+                                            </apex:inputCheckbox>
+                                        </div>
+                                        <div class="dFullCell" style="width:35px; margin-left:20px; float:left;">
+                                            <apex:inputCheckbox value="{!dpTable.filter.completelyMovedCBox}">
+                                                <apex:actionSupport event="onchange" action="{!buildTableWithCurrFilter}" reRender="tablePanel" status="blockUI"/>
+                                            </apex:inputCheckbox>
+                                        </div>
+                                        <div class="dDelivTransfer" style="width:35px; margin-left:20px; float:left;">
+                                            <apex:inputCheckbox value="{!dpTable.filter.delivTransferCBox}">
+                                                <apex:actionSupport event="onchange" action="{!buildTableWithCurrFilter}" reRender="tablePanel" status="blockUI"/>
+                                            </apex:inputCheckbox>
+                                        </div>
+                                    </span>
+                                     <apex:outputPanel style="float:right; font-weight: bold; padding-top: 7px;" id="selectedSum">
+                                         <span>Selected summary: </span>
+                                         <apex:outputText style="margin-left:10px; color:#4791D5" styleClass="valueStyle" value="{0,number,###,###,##0.000}"><apex:param value="{!dpTree.selectedSum}"/></apex:outputText>
+                                     </apex:outputPanel>
+                                </td>
+                            </tr>                      
+                    </table>
+                 </apex:outputPanel>               
+             </apex:facet>
+            
+            <apex:outputPanel id="tablePanel">
+                <apex:pageMessages />
+               <html>  
+                   <div style="padding:2px">
+                    <table class="dTable">
+                                       
+                        <!-- HEADER ROWS -->
+                        <apex:repeat value="{!dpTable.headerCells}" var="row">
+                            <tr>
+                                <apex:repeat value="{!row}" var="cell">
+                                    <td class="{!cell.cssClass}" rowspan="{!cell.rowSpan}" colspan="{!cell.colSpan}" width="{!cell.width}" style="{!IF(cell.imageSource!=null,'vertical-align: middle','')}">
+                                        
+                                        <div style="float:left">
+                                            <apex:outputPanel rendered="{!cell.columnNumber!=null}">
+                                            	<apex:image url="{!$Resource.up_blue_ico}" rendered="{!(cell.columnNumber == dpTree.buffer.columnNumber && dpTree.buffer.sortAscending)}"/>
+                                            </apex:outputPanel>    
+                                            
+                                        	<apex:commandLink style="display:block" action="{!buildTableWithCurrFilter}" rendered="{!cell.columnNumber!=null}" reRender="tablePanel, selectedSum" status="blockUI">
+                                            	<apex:image url="{!$Resource.up_gray_ico}" rendered="{!(cell.columnNumber != dpTree.buffer.columnNumber || !dpTree.buffer.sortAscending)}"/>
+                                                <apex:param name="p1" value="{!cell.columnNumber}" assignTo="{!dpTree.buffer.columnNumber}"/>
+                                                <apex:param name="p2" value="{!'true'}" assignTo="{!dpTree.buffer.sortAscending}"/>
+                                            </apex:commandLink>
+                                            
+                                            <apex:outputPanel rendered="{!cell.columnNumber!=null}">
+                                            	<apex:image url="{!$Resource.down_blue_ico}" rendered="{!(cell.columnNumber == dpTree.buffer.columnNumber && !dpTree.buffer.sortAscending)}"/>
+                                            </apex:outputPanel>   
+                                            
+                                        	<apex:commandLink style="display:block" action="{!buildTableWithCurrFilter}" rendered="{!cell.columnNumber!=null}" reRender="tablePanel, selectedSum" status="blockUI">
+                                            	<apex:image url="{!$Resource.down_gray_ico}" rendered="{!(cell.columnNumber != dpTree.buffer.columnNumber || dpTree.buffer.sortAscending)}"/>
+                                                <apex:param name="p1" value="{!cell.columnNumber}" assignTo="{!dpTree.buffer.columnNumber}"/>
+                                                <apex:param name="p2" value="{!'false'}" assignTo="{!dpTree.buffer.sortAscending}"/>
+                                            </apex:commandLink>
+                                    	</div>   
+                                        
+                                        <apex:commandLink style="float:left" action="{!expandInColumn}" reRender="tablePanel" rendered="{!cell.columnNumber!=null}" status="blockUI">
+                                            <apex:image url="{!$Resource.Plus_Image}"/>
+                                            <apex:param name="p1" value="{!cell.columnNumber}" assignTo="{!selectColNumber}"/>                                           
+                                        </apex:commandLink>
+                                        <apex:commandLink style="float:left" action="{!collapseInColumn}" reRender="tablePanel" rendered="{!cell.columnNumber!=null}" status="blockUI">
+                                        	<apex:image url="{!$Resource.Minus_Image}"/>
+                                            <apex:param name="p1" value="{!cell.columnNumber}" assignTo="{!selectColNumber}"/>
+                                        </apex:commandLink>
+                                        
+                                        <apex:image url="{!cell.imageSource}" rendered="{!cell.imageSource!=null}" style="opacity:0.75"/>
+                                        <font class="{!cell.fontCssClass}">{!cell.value}</font>
+                                        <div style="float:right; margin-right: 3px;">
+                                            <apex:inputCheckbox value="{!cell.selected}" rendered="{!cell.checkable && cell.columnNumber >= dpTree.buffer.columnNumber}">
+                                                <apex:actionSupport event="onchange" action="{!selectAllColumn}" reRender="tablePanel, selectedSum" status="blockUI">
+                                                    <apex:param name="p1" value="{!cell.columnNumber}" assignTo="{!selectColNumber}"/>
+                                                    <apex:param name="p2" value="{!NOT(cell.selected)}" assignTo="{!selectColValue}"/>
+                                                </apex:actionSupport>
+                                            </apex:inputCheckbox> 
+                                        </div>
+                                    </td>
+                                </apex:repeat>
+                            </tr>
+                        </apex:repeat>
+                        
+                        <!-- DATA ROWS -->
+                        <apex:repeat value="{!dpTable.bodyCells}" var="row">
+                            <tr>
+                                <apex:repeat value="{!row}" var="cell">
+                                    <td class="{!cell.cssClass}" rowspan="{!cell.rowSpan}" 
+                                    	onMouseOver="this.className='{!IF(cell.checkable, 'dSelectedCell', cell.cssClass)}'" 
+                                    	onMouseOut="this.className='{!cell.cssClass}'">
+                                        <table border="0" width="100%" cellpadding="0">
+                                            <tr>
+                                                <td width="25px">
+                                                    <apex:commandLink action="{!buildTableWithoutReloadTree}" rendered="{!cell.collapsible}" reRender="tablePanel" status="blockUI">
+                                                        <apex:image url="{!$Resource.Plus_Image}" rendered="{!NOT(cell.treeItem.state.opened)}"/>
+                                                        <apex:image url="{!$Resource.Minus_Image}" rendered="{!cell.treeItem.state.opened}"/>
+                                                        <apex:param name="p1" value="{!NOT(cell.treeItem.state.opened)}" assignTo="{!cell.treeItem.state.opened}"/>
+                                                    </apex:commandLink>
+                                                </td>
+                                                <td>
+                                                    <font class="{!cell.fontCssClass}">{!IF(cell.movementId!='','',cell.value)}</font>
+                                                    <font class="dLossFont">{!cell.loss}</font>
+                                                    <font class="dTransferFont">{!cell.transfer}</font>
+                                                    <span class="dDelivTransferFont">{!cell.delivTransfer}</span>
+                                                    <apex:outputLink value="/{!cell.movementId}" target="_blank"><font class="{!cell.fontCssClass}">{!IF(cell.movementId=='','',cell.value)}</font></apex:outputLink>
+                                                    <font class="dDate">{!cell.mDate}</font>
+                                                    <div class="dBalanceFont">{!IF(cell.showBalance, 'balance: ' & cell.balance, '')}</div>
+                                               </td>
+                                                <td width="25px">
+                                                    <apex:inputCheckbox rendered="{!cell.checkable}" value="{!cell.treeItem.state.selected}">
+                                                        <apex:actionSupport event="onchange" reRender="selectedSum"/>
+                                                    </apex:inputCheckbox>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </apex:repeat>
+                            </tr>
+                        </apex:repeat>
+                        
+                        <!-- FOOTER ROWS -->
+                        <apex:repeat value="{!dpTable.footerCells}" var="row">
+                            <tr>
+                                <apex:repeat value="{!row}" var="cell">
+                                    <td class="{!cell.cssClass}" colspan="{!cell.colSpan}">
+                                        <font class="{!cell.fontCssClass}">{!cell.value}</font>
+                                    </td>
+                                </apex:repeat>
+                            </tr>
+                        </apex:repeat>
+                       
+                    </table> 
+                   </div>
+                </html> 
+            </apex:outputPanel>
+        </apex:pageBlock>
+    </apex:form>
+    
+    <script>
+        function setFocusOnLoad() {} 
+    </script>
+    
+</apex:page>

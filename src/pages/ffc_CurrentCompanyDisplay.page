@@ -1,0 +1,54 @@
+<apex:page controller="FFC_CurrentCompanyDisplayController" showHeader="false" sidebar="false" readonly="true">
+<html>
+<head>
+    <style type="text/css">
+        
+        .companyLink{
+            font-size: 12px;
+            font-family: Arial;
+            color: #000;
+            font-weight: bold;
+            text-decoration: none;
+            text-align: center;
+        }
+        
+        .companyLink:hover{
+            color:#000;	
+        }
+        .companyCell{
+        	vertical-align: middle; 
+            padding-bottom: 7px;
+            padding-top: 7px;         	
+        }
+    </style>
+    
+    <script type="text/javascript">
+        window.onload = function() {
+			height = document.body.scrollHeight;
+            window.parent.postMessage(
+                height
+                ,"*"
+            )
+        };
+    </script>
+    
+</head>
+	<body style="background-color:transparent">
+        <apex:outputPanel rendered="{!NOT(noOneSelected)}">
+            <table>
+                <apex:repeat value="{!companies}" var="companyName">
+                    <tr>
+                        <td class="companyCell" style="padding-right: 4px;">
+                            <apex:image url="{!$Resource.selected_ico}" style="width: 10px;"/>
+                        </td>
+                        <td class="companyCell" style="min-width: 159px;">
+                            <apex:outputLink target="_parent" value="/apex/c2g__codacompanyselection" styleClass="companyLink">{!companyName}</apex:outputLink>                       
+                        </td>
+                    </tr>                            
+                </apex:repeat>            
+            </table>
+        </apex:outputPanel>
+        <apex:outputLink target="_parent" value="/apex/c2g__codacompanyselection" styleClass="companyLink" rendered="{!noOneSelected}">Companies not selected</apex:outputLink>                       
+	</body>
+</html>
+</apex:page>

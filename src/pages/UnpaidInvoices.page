@@ -1,0 +1,117 @@
+<apex:page controller="UnpaidInvoicesController">
+  <!-- Begin Default Content REMOVE THIS -->
+ 
+    <!--*<apex:stylesheet value="{!URLFOR($Resource.styles,'PartPaidSINStyle.css')}"/> -->
+    <style>
+.table,.header{
+      border: 1px solid #C0C0C0;
+      border-collapse:collapse;
+      text-align:center;
+      padding-top:5px;
+      padding-bottom:5px;
+}
+.date{
+        text-align:left;
+        }
+.companyName{
+        margin-top:10px;
+        font-weight:bold;
+        text-align:center;
+        }
+.values,.subTotals,.totals{
+         text-align:right;
+        };
+.totals,.subTotals{
+        font-weight:bold;
+        }
+.back{
+        width:100px;
+        background-color:#CCFF99;
+        border-radius:10px;
+        text-align:center;
+        vertical-align:middle;
+        box-shadow:2px 2px 1px #CCCCCC;
+        border-color:white;
+        border-style:solid;
+        margin-bottom:10px;
+        }
+
+ 
+</style>
+    
+    <script>
+    function toggleShow(){
+        if (document.getElementById("ProformaCashEntry").style.visibility=="hidden"){
+            document.getElementById("ProformaCashEntry").style.visibility="visible";}
+            }else{
+             document.getElementByID("ProformaCashEntry").hidden="hidden";}   
+        };
+      
+    </script>
+   <apex:outputLink value="{!$Page.FinancialForceCustomNavigator}">
+       <div class='back'>
+           Назад
+       </div>
+    </apex:outputLink>
+    <apex:form >
+	   	<apex:selectList value="{!selectedCompany}" size="1">
+    	   <apex:selectOptions value="{!companies}"/>
+   		</apex:selectList>
+   	<apex:commandButton action="{!up}" value="Обновить" reRender="theTable"/>{!showCashManager}
+   	<apex:commandButton action="{!getCashForSelectedInvoices}" value="Получить оплату" onclick="toggleShow()"/>
+  	<apex:commandButton action="{!up}" value="Перевыставить остатки" reRender="theTable"/>
+  
+ 
+  	<table class="uppertable">
+  		<tr>
+  		<td style="width:50%;">
+  			<apex:outputPanel id="theTable">
+   			<apex:pageBlock title="Неоплаченные инвойсы">
+    			<apex:repeat value="{!invoicesByAccount}" var="AccountNameCategory">
+        		<div class="companyName">{!AccountNameCategory}<br/></div>
+    			<apex:pageBlockTable value="{!invoicesByAccount[AccountNameCategory]}" var="Transaction">
+      				<apex:column >
+          				<apex:facet name="header">
+              				<apex:inputCheckbox value="{!selectAll}" id="selectAll">
+                            <apex:actionSupport event="onclick" action="{!toggleSelectAllInvoices}" rerender="theTable">
+                                <apex:param name="accName" value="{!AccountNameCategory}"/>
+                            </apex:actionSupport>
+                            </apex:inputcheckbox>
+         			 	</apex:facet>
+    			      	<apex:inputCheckbox value="{!Transaction.selected}" label="NAME"/>
+      				</apex:column>
+      				<apex:column value="{!Transaction.inv.Name}" headerValue="ID"/>
+      				<apex:column value="{!Transaction.inv.c2g__InvoiceDate__c}" headerValue="Дата инвойса"/>
+     		 		<apex:column value="{!Transaction.inv.c2g__CustomerReference__c}" headerValue="Номер инвойса" style="text-align:center;"/>
+                    <apex:column style="text-align:right;" headerValue="Сумма инвойса">
+                        <apex:outputText value="{0, number, ###,###,##0.00}"> 
+                        	<apex:param value="{!Transaction.inv.c2g__InvoiceTotal__c}"/>
+                        </apex:outputText> {!Transaction.inv.c2g__InvoiceCurrency__r.Name}<br/></apex:column>
+      				<apex:column style="text-align:right;" footerClass="totals" headerValue="Остаток к оплате">
+        		  		<apex:outputText value="{0, number, ###,###,##0.00}"> 
+                        	<apex:param value="{!If((Transaction.inv.c2g__InvoiceStatus__c="In Progress"),Transaction.inv.c2g__InvoiceTotal__c, Transaction.inv.c2g__OutstandingValue__c)}"/>
+                        </apex:outputText> {!Transaction.inv.c2g__InvoiceCurrency__r.Name}<br/>
+						<apex:facet name="footer">
+	       			 	<apex:repeat value="{!totalsByAccount[AccountNameCategory]}" var="curr">
+               			    <apex:outputText value="{0, number, ###,###,##0.00}"> 
+           		        	    <apex:param value="{!totalsByAccount[AccountNameCategory][curr]}"/>
+               			    </apex:outputText> {!curr}<br/>
+            			</apex:repeat>
+   			       		</apex:facet>
+      				</apex:column> 
+    			</apex:pageBlockTable>
+  				</apex:repeat>  
+  			</apex:pageBlock>
+   			</apex:outputPanel>
+        </td>
+ 		<td>
+        <apex:outputPanel id="showProformaCashEntry">
+		 <div  id="ProformaCashEntry" style="visibility:hidden">ProformaCE</div>
+ 		  </apex:outputPanel> 
+	    </td>
+  	</tr>
+  </table>
+      {!eMessage}
+ 
+</apex:form>
+</apex:page>

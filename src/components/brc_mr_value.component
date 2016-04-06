@@ -1,0 +1,18 @@
+<apex:component >
+    <apex:attribute name="item" type="BRC_MR_Item" required="true" description="Item"/>
+    <apex:attribute name="edit" type="boolean" required="true" description="edit mode"/>
+    <apex:attribute name="showGroupValues" type="boolean" required="true" description="group values"/>
+    <apex:outputPanel rendered="{!(NOT(edit) &&  item.value != null && item.value.Id != null && !item.mrItem.Group__c) || 
+                                (item.mrItem.Group__c && showGroupValues) || 
+                                (edit && !item.mrItem.Group__c && item.value != null && (item.value.Auto__c || item.mrItem.Dependent__c))}">
+        <c:brc_currencyField value="{!item.value.Value__c}" currencyCode="{!item.value.currencyIsoCode}" rendered="{!item.value != null}" />
+    </apex:outputPanel>
+    <apex:outputPanel rendered="{!item.value == null && item.mrItem.Auto__c}" style="color:red" >Автообновление</apex:outputPanel>
+    <apex:outputPanel rendered="{!item.value == null && item.mrItem.Dependent__c}" style="color:blue" >Зависимое поле</apex:outputPanel>
+    <apex:inputField value="{!item.value.Value__c}"
+                     rendered="{!((edit && item.value != null && !item.mrItem.Group__c && !item.value.Auto__c) || 
+                               (item.value != null && item.value.Id == null && !item.mrItem.Group__c))&& !item.mrItem.Dependent__c}"
+                     required="false" />
+    <apex:outputPanel rendered="{!item.value==null && !item.mrItem.Auto__c && !item.mrItem.Dependent__c}"
+                      style="color:red">{!item.mrItem.Owner__r.User__r.Name} - не введено</apex:outputPanel>
+</apex:component>

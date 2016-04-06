@@ -1,0 +1,173 @@
+<apex:page standardController="c2g__codaInvoice__c" showHeader="false" sidebar="false" standardStylesheets="false" renderAs="pdf"> <!--renderAs="pdf" -->
+    <apex:stylesheet value="{!URLFOR($Resource.c2g__coda2go,'coda2go/web/css/style.css')}"/>
+    <apex:stylesheet value="{!URLFOR($Resource.c2g__coda2go,'coda2go/web/css/codainvoiceprint.css')}"/>
+    <table>
+        <tr>
+            <td>
+                <div>
+                    <apex:image url="{!c2g__codaInvoice__c.c2g__OwnerCompany__r.c2g__LogoURL__c}"/> 
+                </div>
+            </td>
+            <td align="right">
+                <h3><apex:outputText value="{!c2g__codaInvoice__c.c2g__OwnerCompany__r.Name}"/> </h3>
+                <apex:outputText value="{!c2g__codaInvoice__c.c2g__OwnerCompany__r.c2g__Street__c}, {!c2g__codaInvoice__c.c2g__OwnerCompany__r.c2g__ZipPostCode__c}"/>
+                <br/> 
+                <apex:outputText value="{!c2g__codaInvoice__c.c2g__OwnerCompany__r.c2g__City__c}, {!c2g__codaInvoice__c.c2g__OwnerCompany__r.c2g__Country__c}."/>
+                <br/>
+                <apex:outputText value="{!c2g__codaInvoice__c.c2g__OwnerCompany__r.c2g__Website__c}" /> 
+                <apex:outputText value="{!c2g__codaInvoice__c.c2g__OwnerCompany__r.c2g__ContactEmail__c}"/>                 
+            
+            </td>
+        </tr>
+        <hr></hr>
+    </table>
+    <table>
+        <tr>
+            <td class="zeropadding">&nbsp;</td>
+        </tr>
+        <tr>
+            <td align="left">
+                Reciever
+            </td>
+            <td>
+                Terms of payment:
+            </td>
+        </tr>
+        <tr>
+            <td class="zeropadding">
+                <b><apex:outputText value="{!c2g__codaInvoice__c.c2g__Account__r.Name}"/></b>
+                <br></br>
+                <apex:outputText value="{!c2g__codaInvoice__c.c2g__Account__r.BillingCity}, {!c2g__codaInvoice__c.c2g__Account__r.BillingStreet}"/>
+                <br></br>
+                <apex:outputText value="{!c2g__codaInvoice__c.c2g__Account__r.BillingPostalCode}, {!c2g__codaInvoice__c.c2g__Account__r.BillingCountry}."/>
+            </td>
+            <td>
+                <apex:outputText value="{!IF(ISBLANK( c2g__codaInvoice__c.Contract_number__c ) ,null, "Contract: "&c2g__codaInvoice__c.Contract_Number__r.Name )}"/>
+                <br></br>
+                <apex:outputText value="{!IF(ISBLANK( c2g__codaInvoice__c.Addendum_Name__c ) ,null, "Addendum: "&c2g__codaInvoice__c.Addendum_Name__r.Name )}"/>
+            </td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><b>Due date: </b> 
+            <apex:outputText value="{!IF(DAY(c2g__codaInvoice__c.c2g__InvoiceDate__c)<10,TEXT(0)&TEXT(DAY(c2g__codaInvoice__c.c2g__InvoiceDate__c)),null)}.{!IF(MONTH(c2g__codaInvoice__c.c2g__InvoiceDate__c)<10,TEXT(0)&TEXT(MONTH(c2g__codaInvoice__c.c2g__InvoiceDate__c)),null)}.{!YEAR(c2g__codaInvoice__c.c2g__InvoiceDate__c)}"/></td>
+        
+        </tr>
+        <tr>
+            <td class="zeropadding">&nbsp;</td>
+        </tr>
+    </table>
+<!-- Here ends the initial information (below the logo), and billing & shipment info starts. -->    
+    <h1>Invoice: <apex:outputText value=" {!c2g__codaInvoice__c.c2g__CustomerReference__c}"/></h1>
+    <br/>
+    <h2>Description:</h2>
+    <apex:outputField value="{!c2g__codaInvoice__c.c2g__InvoiceDescription__c}"/>
+    
+     
+    <div class="hspacer"></div>
+       <div class="hspacer"></div> 
+    <apex:pageBlock >
+    <apex:pageBlockTable value="{!c2g__codaInvoice__c.c2g__InvoiceLineItems__r}" var="lineItem" styleClass="boxedtable" width="100%">
+        <apex:column styleClass="aligntop widthsupersmall aligncenter bottomline">
+            <apex:facet name="header">&nbsp;</apex:facet>
+            <apex:outputField value="{!lineItem.c2g__LineNumber__c}"/>
+        </apex:column>
+        <apex:column styleClass="aligntop bottomline">
+            <apex:facet name="header">
+                <apex:outputPanel layout="block" styleClass="aligncenter headerpadding">Product Name</apex:outputPanel>
+            </apex:facet>
+            <apex:outputText value="{!lineItem.c2g__Product__r.Name}"/>
+        </apex:column>
+        <apex:column styleClass="alignright aligntop widthsmall bottomline">
+            <apex:facet name="header">
+                <apex:outputPanel layout="block" styleClass="aligncenter headerpadding">Quantity</apex:outputPanel>
+            </apex:facet>
+            <apex:outputField value="{!lineItem.c2g__Quantity__c}"/>
+        </apex:column>
+        
+        <apex:column styleClass="alignright aligntop widthmedium bottomline">
+            <apex:facet name="header">
+                <apex:outputPanel layout="block" styleClass="aligncenter headerpadding">Unit Price ({!c2g__codaInvoice__c.CurrencyIsoCode})</apex:outputPanel>
+            </apex:facet>
+            <apex:outputText value="{!lineItem.c2g__UnitPrice__c}"/>
+        </apex:column>
+        
+   
+        <apex:column styleClass="alignright aligntop widthmedium rightline bottomline">
+            <apex:facet name="header">
+                <apex:outputPanel layout="block" styleClass="aligncenter rightline headerpadding">Net Value ({!c2g__codaInvoice__c.CurrencyIsoCode})</apex:outputPanel>
+            </apex:facet>
+            <apex:outputText value="{!lineItem.c2g__NetValue__c}"/>
+        </apex:column>
+    </apex:pageBlockTable>
+    </apex:pageBlock>
+      
+   <table>
+            <tr>
+                <td class="aligntop generalnopadding">
+                    <table>
+                        <tr>
+                            <td class="strong alignright">
+                                <apex:outputText value="Total due"/>
+                            </td>
+                            <td class="widthmedium boxed alignright">
+                                <apex:outputText value="{!c2g__codaInvoice__c.c2g__InvoiceTotal__c} {!c2g__codaInvoice__c.CurrencyIsoCode}"/>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+        </tr>
+    </table>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <table>
+       <tr>
+             <td class="strong alignleft">
+                   <apex:outputText value="Bank:"/>
+              </td>
+              <td class="strong alignleft">
+                                <apex:outputText value="{!c2g__codaInvoice__c.Bank_Account__r.c2g__BankName__c}"/>
+             </td>
+       </tr>
+       <tr>
+             <td class="strong alignleft">
+                   <apex:outputText value="Beneficiary:"/>
+              </td>
+              <td class="strong alignleft">
+                                <apex:outputText value="{!c2g__codaInvoice__c.c2g__OwnerCompany__r.Name}"/>
+             </td>
+       </tr>
+       <tr>
+             <td class="strong alignleft">
+                   <apex:outputText value="Registered:"/>
+              </td>
+              <td class="strong alignleft">
+                                <apex:outputText value="{!c2g__codaInvoice__c.c2g__OwnerCompany__r.c2g__Street__c}, "/>
+                <apex:outputText value="{!c2g__codaInvoice__c.c2g__OwnerCompany__r.c2g__City__c}, "/>
+                <apex:outputText value="{!c2g__codaInvoice__c.c2g__OwnerCompany__r.c2g__StateProvince__c}, " rendered="{!IF(ISBLANK(c2g__codaInvoice__c.c2g__OwnerCompany__r.c2g__StateProvince__c),false,true)}"/>
+                <apex:outputText value="{!c2g__codaInvoice__c.c2g__OwnerCompany__r.c2g__Country__c}"/>
+               
+             </td>
+       </tr>
+       <tr>
+             <td class="strong alignleft">
+                   <apex:outputText value="IBAN:"/>
+              </td>
+              <td class="strong alignleft">
+                                <apex:outputText value="{!c2g__codaInvoice__c.Bank_Account__r.c2g__IBANNumber__c}"/>
+             </td>
+       </tr>
+       <tr>
+             <td class="strong alignleft">
+                   <apex:outputText value="Swift:"/>
+              </td>
+              <td class="strong alignleft">
+                                <apex:outputText value="{!c2g__codaInvoice__c.Bank_Account__r.c2g__SWIFTNumber__c}"/>
+             </td>
+       </tr>
+     </table>
+     
+   
+</apex:page>

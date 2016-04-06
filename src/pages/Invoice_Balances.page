@@ -1,0 +1,113 @@
+<apex:page controller="InvoiceBalancesController">
+  <!-- Begin Default Content REMOVE THIS -->
+
+    <!--*<apex:stylesheet value="{!URLFOR($Resource.styles,'PartPaidSINStyle.css')}"/> -->
+    <style>
+.table,.header,.companyName{
+      border: 1px solid #C0C0C0;
+      border-collapse:collapse;
+      text-align:center;
+      padding-top:5px;
+      padding-bottom:5px;
+}
+.date{
+        text-align:left;
+        }
+.companyName{
+        background-color:#99CCFF
+        }
+.values,.totals{
+         text-align:right;
+         border: 1px solid #C0C0C0;
+	     border-collapse:collapse;
+        padding-top:5px;
+      	padding-bottom:5px;
+        };
+.totals{
+        font-weight:bold;
+        }
+        .back{
+        width:150px;
+        background-color:#CCFF99;
+        border-radius:10px;
+        text-align:center;
+        vertical-align:middle;
+        box-shadow:2px 2px 1px #CCCCCC;
+        border-color:white;
+        border-style:solid;
+        margin-bottom:10px;
+        }
+</style>
+   <apex:outputLink value="{!$Page.FinancialForceCustomNavigator}">
+       <div class='back'>
+           Назад
+       </div>
+    </apex:outputLink>
+    <apex:form >
+   <apex:selectList value="{!selectedCompany}" size="1">
+        
+       <apex:selectOptions value="{!companies}"/>
+   </apex:selectList>
+   <apex:commandButton action="{!up}" value="Обновить" reRender="theTable"/>
+  <apex:outputPanel id="theTable">
+  <html>
+  <div>
+  <table Class="table">
+  <tr Class="table">
+      <th Class="header">ID</th>
+      <th Class="header">Дата инвойса</th>
+      <th Class="header">Номер инвойса</th>
+      <th Class="header">Сумма инвойса</th>
+      <th Class="header">Остаток к оплате</th>
+      
+  </tr>
+  <apex:repeat value="{!transactionsByAccount}" var="TransactionSet" >
+      <tr >
+          <td colspan="5" Class="companyName">
+              <apex:commandLink action="{!openAccount}" value="{!TransactionSet}" target="_blank">
+                  <apex:param value="{!TransactionSet}" name="accountToOpenName"/>
+              </apex:commandLink>    
+          </td>
+      </tr>
+      <apex:repeat value="{!transactionsByAccount[TransactionSet]}" var="Transaction">
+          <tr Class="table">
+          <td Class="table">
+              <apex:commandLink action="{!openInvoice}" value="{!Transaction.c2g__DocumentNumber__c}" target="_blank">
+                  <apex:param value="{!Transaction.c2g__DocumentNumber__c}" name="invoiceInternalNumber"/>
+              </apex:commandLink>   
+          </td>
+          <td Class="table">
+              <apex:outputText value="{0,date,MM.dd.YYYY}">
+              	<apex:param value="{!Transaction.c2g__TransactionDate__c}"/>
+              </apex:outputText>
+          </td>
+           <td Class="table">
+              <apex:outputText value="{!Transaction.c2g__DocumentReference__c}"/>
+          </td>
+           <td Class="values">
+               <apex:outputField value="{!Transaction.c2g__AccountTotal__c}"/>
+          </td>
+          <td Class="values">
+              <apex:outputField value="{!Transaction.c2g__AccountOutstandingTotal__c}" />
+          </td>
+          </tr>
+      </apex:repeat>
+      <tr>
+        <td colspan="5" Class="totals">
+           Итого: <apex:outputText value="{0, number, ###,###,##0.00}">
+            <apex:param value="{!totalsByAccount[TransactionSet]}"/>
+            </apex:outputText>
+        </td>
+      </tr>
+  </apex:repeat>
+      <tr >
+          <td colspan="5" Class="totals">
+              <apex:outputText value="Итого: {!total}"/>
+          </td>
+      </tr>
+  </table>
+   </div>
+ </html>
+</apex:outputPanel>
+</apex:form>
+</apex:page>

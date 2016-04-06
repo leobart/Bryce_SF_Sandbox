@@ -1,0 +1,72 @@
+<apex:page controller="LogisticReportsController">
+    
+    <apex:includeScript value="{!URLFOR($Resource.JQuery)}"/>  
+    <apex:includeScript value="{!URLFOR($Resource.JQueryBlockUI)}"/>  
+    <apex:includeScript value="{!URLFOR($Resource.BlockUIConfig)}"/>
+    
+    <style>
+        .empty-column-content {
+        	display: none;
+    	}
+        .summaryCells{
+        	background-color:#B3E2D7;
+        	font-weight: bold;       	
+        }
+    </style>
+    
+    <apex:form >
+        <apex:pageBlock id="commonPageBlock" title="Logistic Reports">
+            <apex:actionStatus onstart="blockPage()" onstop="unblockPage()" id="blockUI"/>
+            <apex:pageMessages />
+            <apex:pageBlockButtons id="buttonsPanel" >
+                <apex:commandButton value="View" action="{!runReport}" reRender="commonPageBlock" status="blockUI"/>
+                <apex:commandButton value="Excel" action="{!excel}" rendered="{!NOT(isEmptyTable)}" />
+            </apex:pageBlockButtons>
+            
+            <apex:selectList size="1" value="{!selectedReport}" id="rList" style="font-weight: bold; margin-bottom: 20px;">
+                <apex:actionSupport event="onchange" action="{!clearReport}" reRender="commonPageBlock" status="blockUI"/>
+            	<apex:selectOption itemValue="0" itemLabel="Отгрузки по месяцу договора"/>
+                <apex:selectOption itemValue="1" itemLabel="Сводная по отгрузкам"/>
+                <apex:selectOption itemValue="2" itemLabel="План продаж: продавец - покупатель"/>
+                <apex:selectOption itemValue="3" itemLabel="План продаж: покупатель - продавец"/>
+            </apex:selectList>
+            <apex:outputPanel id="parameterPanels">
+                <apex:outputPanel rendered="{!selectedReport<=3}" >
+                    <div>
+                        <span>Delivery Plan: </span>
+                        <apex:selectList value="{!selectedDeliveryPlan}" size="1" style="margin-left:5px">
+                             <apex:actionSupport event="onchange" action="{!clearReport}" reRender="commonPageBlock"/>
+	                         <apex:selectOptions value="{!deliveryPlansSO}" />
+                        </apex:selectList>
+                        <span style="margin-left:15px">Contract month: </span>
+                         <apex:selectList value="{!selectedMonth}" size="1" style="margin-left:5px">
+                             <apex:actionSupport event="onchange" action="{!clearReport}" reRender="commonPageBlock"/>
+                             <apex:selectOptions value="{!monthsSO}"/>
+                         </apex:selectList>                       
+                         <apex:selectList value="{!selectedYear}" size="1">
+                             <apex:actionSupport event="onchange" action="{!clearReport}" reRender="commonPageBlock"/>
+                             <apex:selectOptions value="{!yearsSO}"/>
+                         </apex:selectList>
+                    </div>
+                </apex:outputPanel>
+            </apex:outputPanel>
+            
+            <apex:outputPanel id="reportBlock">
+                <apex:pageBlockTable id="reportTable" value="{!reportTable}" var="row" rendered="{!NOT(isEmptyTable)}" style="margin-top:20px">
+                    <apex:repeat var="cell" value="{!row}"> 
+                        <apex:column headerValue="" styleClass="{!IF(cell.isSummary, 'summaryCells', '')}" style="{!IF(cell.isSummary, '', 'border-left-width: 1px')}">
+                            <apex:outputText value="{0,number,###,###,##0.000}" rendered="{!cell.type=='Decimal'}"><apex:param value="{!cell.value}"/></apex:outputText>
+                            <apex:outputText value="{!cell.value}" rendered="{!cell.type=='String'}"/>  
+                            <apex:outputLink value="/{!cell.Id}" target="_blank" rendered="{!cell.type=='Link'}">{!cell.value}</apex:outputLink>
+                        </apex:column>
+                    </apex:repeat>
+                    <apex:repeat var="header" value="{!reportTableHeaders}">
+                        <apex:column headerValue="{!header}" styleClass="empty-column-content" />
+                    </apex:repeat>               
+                </apex:pageBlockTable>
+            </apex:outputPanel>
+        </apex:pageBlock>
+        <apex:actionFunction action="{!clearReport}" name="cleanReportJS" rerender="reportBlock, buttons"/>
+    </apex:form>
+        
+</apex:page>

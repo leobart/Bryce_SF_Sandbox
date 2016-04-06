@@ -1,0 +1,278 @@
+<apex:page tabStyle="c2g__codaTransaction__c" standardController="c2g__codaCashEntry__c"
+           extensions="FFC_CEMatchingToolController" sidebar="false" showHeader="false" >
+    
+    <apex:includeScript value="{!URLFOR($Resource.JQuery)}"/>  
+    <apex:includeScript value="{!URLFOR($Resource.JQueryBlockUI)}"/>  
+    <apex:includeScript value="{!URLFOR($Resource.BlockUIConfig)}"/>
+    <apex:includeScript value="{!URLFOR($Resource.EndWindowSession)}"/>
+    <script>
+        $j = jQuery.noConflict();
+        var isClicked = false;
+        var buttonPressed = false;
+        var complete = false;
+        var updated = false;
+        $j(document).ready(function() {
+            try{
+          	   wireUpEvents();  
+               window.opener.updateAllAction(); 
+            }catch(e){
+            }            
+        });
+    
+        function checkDoubleSubmit(){
+            if (isClicked) {
+                return false;
+            }else {
+                isClicked = true;
+                buttonPressed = true;
+                blockPage();
+                $j("[id*='CmdBtnGrp']").addClass("btnDisabled");
+                $j("[id*='CmdBtnGrp']").val("Processing...");
+                return true;
+            }
+        }
+    
+        function cancelAction(){
+            try{
+               buttonPressed = true;
+               complete = true; 
+               window.opener.postMessage("unblock","*");
+               window.opener.unblock(); 
+            }catch(e){
+            }
+            window.close();
+        }
+    
+        /*end session processing: */        
+        function endSession() {
+          cancelAction();
+        }
+         
+    </script>
+    
+    <style>
+        body, html {
+            background: linear-gradient(to top, #FFFFFF, #E4F4F8);
+            height: 100%;        
+        }
+        body .secondaryPalette.bPageBlock, body .individualPalette .secondaryPalette.bPageBlock {
+			background-color: #f8f8f8;
+			border-color: #99BAB9;
+			-moz-border-radius: 4px;
+			-webkit-border-radius: 10px;
+			border-radius: 4px;
+			box-shadow: 0px 1px 6px rgba(0, 0, 0, 0.16);
+        }
+    </style>
+    <apex:form >
+        <!-- Header -->
+        <apex:sectionHeader title="Cash Entry Matching Tool" subtitle="{!cashEntry.Name}" />
+        <apex:actionStatus onstart="blockPage()" onstop="unblockPage()" id="blockUI"/>
+        
+        <div style="padding-left:10px;padding-right:10px">
+        <apex:outputPanel id="commonPanel">
+            <apex:pageMessages />
+            <apex:outputPanel >
+               <div style=" margin-top: 20px;"/>               
+                <apex:outputPanel rendered="{!noErrors}">
+                    <apex:actionRegion >
+                        <apex:selectList size="1" value="{!selectedProcedure}" style="font-weight: bold; margin-bottom: 20px;">
+                            <apex:actionSupport event="onchange" action="{!initEntities}" reRender="commonPanel" status="blockUI" />
+                            <!--apex:selectOption itemValue="1" itemLabel="Предоплата за товар/услугу" /-->
+                            <apex:selectOption itemValue="2" itemLabel="Оплата за поставку/услугу, Оплата расходов, Оплата комиссий в банке" rendered="{!cashEntry.c2g__Type__c == 'Payment'}"  />
+                            <apex:selectOption itemValue="2" itemLabel="Получение оплаты за поставку/услугу" rendered="{!cashEntry.c2g__Type__c == 'Receipt'}"  />
+                            <apex:selectOption itemValue="3" itemLabel="Выданный займ - выдача" rendered="{!cashEntry.c2g__Type__c == 'Payment'}" />
+                            <apex:selectOption itemValue="3" itemLabel="Выданный займ  - возврат" rendered="{!cashEntry.c2g__Type__c == 'Payment Refund'}" />
+                            <apex:selectOption itemValue="5" itemLabel="Депонирование Cash Margin" rendered="{!cashEntry.c2g__Type__c == 'Payment'}" />
+                            <apex:selectOption itemValue="5" itemLabel="Возврат Cash Margin" rendered="{!cashEntry.c2g__Type__c == 'Payment Refund'}" />
+                            <apex:selectOption itemValue="6" itemLabel="Конвертация валюты - списание" rendered="{!cashEntry.c2g__Type__c == 'Payment'}" />
+                            <apex:selectOption itemValue="6" itemLabel="Конвертация валюты - зачисление" rendered="{!cashEntry.c2g__Type__c == 'Payment Refund'}" />
+                            <apex:selectOption itemValue="7" itemLabel="Перевод между счетами - списание" rendered="{!cashEntry.c2g__Type__c == 'Payment'}" />
+                            <apex:selectOption itemValue="7" itemLabel="Перевод между счетами - зачисление" rendered="{!cashEntry.c2g__Type__c == 'Payment Refund'}" />
+                            <apex:selectOption itemValue="8" itemLabel="Полученный займ - возврат" rendered="{!cashEntry.c2g__Type__c == 'Refund'}" />
+                            <apex:selectOption itemValue="8" itemLabel="Полученный займ - получение" rendered="{!cashEntry.c2g__Type__c == 'Receipt'}" />
+                            <apex:selectOption itemValue="9" itemLabel="Возврат клиенту" rendered="{!cashEntry.c2g__Type__c == 'Refund'}" />
+                            <apex:selectOption itemValue="10" itemLabel="Возврат от поставщика по акту сверки" rendered="{!cashEntry.c2g__Type__c == 'Payment Refund'}" />
+                        </apex:selectList>
+                    </apex:actionRegion>
+                    
+                    <!-- подпараметры: -->
+                    <!-- 2 Оплата  за поставку/услугу | Оплата расходов outcoming -->            
+                    <apex:outputPanel rendered="{!selectedProcedure == 2 && paymentType == 'outcoming'}">
+                        <apex:actionRegion >
+                            <div style="margin-bottom:20px;">
+                                <apex:inputCheckbox value="{!useAnotherPIN}">    
+                                    <apex:actionSupport event="onchange" action="{!initEntities}" reRender="commonPanel"  status="blockUI"  />
+                                </apex:inputCheckbox>
+                                Выбрать существующий PIN
+                            </div>
+                        </apex:actionRegion>
+                        <apex:outputPanel >
+                            <apex:outputPanel rendered="{!useAnotherPIN}">
+                                <table>
+                                    <tr>
+                                        <td style="vertical-align: middle; width: 160px">Выберите PIN:</td>
+                                        <td>
+                                            <apex:inputField value="{!anotherPINLine.c2g__PurchaseInvoice__c}">
+                                                <apex:actionSupport event="onchange" action="{!initEntities}" reRender="commonPanel"  status="blockUI"  />
+                                            </apex:inputField>
+                                        </td>
+                                    </tr>                            
+                                </table>
+                                <br/>
+                                <c:ffc_CurrencyRates crm="{!crManager}"/>
+                             </apex:outputPanel>
+                        </apex:outputPanel>
+                    </apex:outputPanel>
+                    
+                    <!-- 3 Выданный займ (выдача/возврат) outcoming -->
+                    <!-- 8 Полученный займ (получение/возврат) outcoming -->
+                    <apex:outputPanel rendered="{!selectedProcedure == 3 || selectedProcedure == 8}">
+                        <table style="margin-bottom:20px;">
+                            <tr>
+                                <td style="vertical-align: middle; width:120px">Выберите тип:</td>
+                                <td>
+                                    <apex:selectList size="1" value="{!loanType}" >
+                                        <apex:actionSupport event="onchange" action="{!initEntities}" reRender="commonPanel" status="blockUI"/>
+                                        <apex:selectOption itemValue="short" itemLabel="Краткосрочный" />
+                                        <apex:selectOption itemValue="long" itemLabel="Долгосрочный"/>
+                                    </apex:selectList>
+                                </td>
+                            </tr>
+                        </table>                    
+                    </apex:outputPanel>            
+                                        
+                    <!-- 6 Конвертация валюты outcoming / incoming -->
+                    <!-- 7 Перевод между счетами outcoming / incoming -->
+                    <apex:outputPanel rendered="{!selectedProcedure == 6 || selectedProcedure == 7}">
+                        <apex:actionRegion >
+                            <div style="margin-bottom:20px;">
+                                <apex:inputCheckbox value="{!useAnotherCE}">    
+                                    <apex:actionSupport event="onchange" action="{!initEntities}" reRender="commonPanel"  status="blockUI"  />
+                                </apex:inputCheckbox>
+                                Выбрать из существующих Cash Entry
+                            </div>
+                        </apex:actionRegion>
+                        <apex:outputPanel >
+                            <apex:outputPanel rendered="{!useAnotherCE}">
+                                <table>
+                                    <tr>
+                                        <td style="vertical-align: middle; width: 160px">Выберите Cash Entry ({!IF(ce.c2g__Type__c == 'Payment','списания','зачисления')}):</td>
+                                        <td>
+                                            <apex:inputField value="{!ceLineItem.c2g__CashEntry__c}">
+                                                <apex:actionSupport event="onchange" action="{!initEntities}" reRender="commonPanel"  status="blockUI"  />
+                                            </apex:inputField>
+                                        </td>
+                                    </tr>                            
+                                </table>
+                                <c:ffc_CurrencyRates crm="{!crManager}"/>
+                             </apex:outputPanel>
+                        </apex:outputPanel>
+                    </apex:outputPanel>
+                                       
+                    <!-- 9 Возврат клиенту outcoming -->
+                    <!-- 10 Возврат от поставищика incoming -->
+                    <apex:outputPanel rendered="{!(selectedProcedure == 9 && paymentType == 'outcoming')  || selectedProcedure == 10 && paymentType == 'incoming'}">
+                        <apex:actionRegion >
+                            <div style="margin-bottom:20px;">
+                                <apex:inputCheckbox value="{!useAnotherCE}">    
+                                    <apex:actionSupport event="onchange" action="{!initEntities}" reRender="commonPanel"  status="blockUI"  />
+                                </apex:inputCheckbox>
+                                Возврат за товар или услугу
+                            </div>
+                        </apex:actionRegion>
+                        <apex:outputPanel rendered="{!useAnotherCE}">
+                            <table>
+                                <tr>
+                                    <td style="vertical-align: middle; width: 160px">Выберите Cash Entry:</td>
+                                    <td><apex:inputField value="{!ceLineItem.c2g__CashEntry__c}"/></td>
+                                </tr>                            
+                            </table>
+                        </apex:outputPanel>
+                    </apex:outputPanel>
+                    
+                </apex:outputPanel>
+                
+           </apex:outputPanel>
+            
+           <apex:outputPanel rendered="{!noErrors}">
+                             
+               
+                <!-- 2 Оплата  за поставку/услугу | Оплата расходов outcoming -->            
+                <apex:outputPanel rendered="{!selectedProcedure == 2 && paymentType == 'outcoming' && !useAnotherPIN}">
+                    <c:ffc_PINDetail pInvoice="{!payableInvoice}" 
+                                     pInvoiceLineItem="{!payableInvoiceLineItem}" 
+                                     pInvoiceExpItem="{!payableInvoiceExpItem}" 
+                                     lineTypeSO="{!lineTypeSO}" 
+                                     lineType="{!lineType}" crm="{!crManager}"
+                                     rendered="{!paperInvoice}"/>
+                    <c:ffc_JournalDetail journal="{!journal}" 
+                                         journalLineItem1="{!journalLineItem1}" 
+                                         journalLineItem2="{!journalLineItem2}" 
+                                         glaSelect="(выберите с префиксом 6)"
+                                         rendered="{!!paperInvoice}"/> 
+                </apex:outputPanel>
+                    
+                    <!-- 2 Оплата  за поставку/услугу | Оплата расходов incoming --> 
+                <apex:outputPanel rendered="{!selectedProcedure == 2 && paymentType == 'incoming'}">
+                    <c:ffc_invoiceDetail invoice="{!invoice}" 
+                                         invoiceLineItem="{!invoiceLineItem}"/>
+                </apex:outputPanel>
+                    
+                <!-- 3 Выданный займ (выдача/возврат) outcoming -->
+                <!-- 8 Полученный займ (получение/возврат) outcoming -->
+                <apex:outputPanel rendered="{!selectedProcedure == 3 || selectedProcedure == 8}">
+                    <c:ffc_JournalDetail journal="{!journal}" 
+                                         journalLineItem1="{!journalLineItem1}" 
+                                         journalLineItem2="{!journalLineItem2}"/> 
+                </apex:outputPanel>            
+                                
+                <!-- 5 Cash Margin / Депозит outcoming -->
+                <apex:outputPanel rendered="{!selectedProcedure == 5}">
+                    <c:ffc_JournalDetail journal="{!journal}" 
+                                         journalLineItem1="{!journalLineItem1}" 
+                                         journalLineItem2="{!journalLineItem2}"
+                                         glaSelect="(с префиксом 1, словом Cash Margin, названием банка)"/> 
+                </apex:outputPanel>      
+                    
+                <!-- 6 Конвертация валюты outcoming / incoming -->
+                <!-- 7 Перевод между счетами outcoming / incoming -->
+                <apex:outputPanel rendered="{!selectedProcedure == 6 || selectedProcedure == 7}">
+                	<c:ffc_CashEntryDetail ce="{!ce}"     
+                                           ceLineItem="{!ceLineItem}"
+                                           procedureNumber="{!selectedProcedure}"
+                                           ceFrom="{!cashEntry}"
+                                           rendered="{!!useAnotherCE}" crm="{!crManager}"  />                                                                                
+                </apex:outputPanel>
+                                                    
+                <!-- 9 Возврат клиенту outcoming -->
+                <!-- 10 Возврат от поставищика incoming -->
+                <apex:outputPanel rendered="{!(selectedProcedure == 9 && paymentType == 'outcoming')  || selectedProcedure == 10 && paymentType == 'incoming'}">
+                  	<apex:outputPanel rendered="{!!useAnotherCE}">
+                       	<apex:outputPanel rendered="{!selectedProcedure == 9 && paymentType == 'outcoming'}">
+                           	<c:ffc_SCRDitail creditNote="{!creditNote}" 
+                                             creditNoteLineItem="{!creditNoteLineItem}"/>
+                        </apex:outputPanel>
+                        <apex:outputPanel rendered="{!selectedProcedure == 10 && paymentType == 'incoming'}">
+                            <c:ffc_PCRDetail pcr="{!payableCreditNote}" 
+                                             pcrLineItem="{!payableCreditNoteLineItem}"/>
+                        </apex:outputPanel>                        
+                    </apex:outputPanel>
+                </apex:outputPanel>               
+                            
+        	</apex:outputPanel> 
+            
+            <div width="100%" style="text-align:center"> 
+                <!-- --------------------- Buttons ------------------ -->   
+                <div style="margin-top: 20px;">         
+                    <apex:commandButton id="actionCmdBtnGrp" action="{!createAction}"  value="Match" 
+                                        rendered="{!noErrors}"  
+                                        onclick="return checkDoubleSubmit()"/>
+                    <apex:commandButton id="cancelCmdBtnGrp" value="Cancel" immediate="true" onclick="cancelAction()" style="margin-left:10px"/>
+                </div>                
+            </div>
+        </apex:outputPanel>
+        </div>
+    </apex:form>
+    
+</apex:page>

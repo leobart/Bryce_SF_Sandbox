@@ -1,0 +1,28 @@
+<apex:component controller="ccaccountBalancesControllerExtension">
+     <apex:attribute name="accountIDattribute" description="ID of the current Account" type="String" required="required" assignTo="{!accountID}"/>
+    <apex:attribute name="accountNameAttribute" description="Name of the current Account" type="String" required="required" assignTo="{!accountName}"/>
+   <apex:pageBlock >
+    <apex:pageBlockSection title="Balance" collapsible="true">
+   <apex:pageBlockTable value="{!QueryResults}" var="QueryResult">
+        <apex:column >
+            <apex:facet name="header">Company name</apex:facet>
+            <apex:outputText value="{!QueryResult}"></apex:outputText>
+        </apex:column>
+        <apex:column >
+            <apex:facet name="header">Balance</apex:facet>
+            <apex:commandLink action="{!openReportWithAccount}" target="_blank">
+            <apex:outputText value="{0,number,###,###,##0.00}">
+                <apex:param value="{!QueryResults[QueryResult]}"/>
+            </apex:outputText> 
+                <apex:param name="Company" value="{!QueryResult}"/>
+        </apex:commandLink> {!cur}
+            <apex:facet name="footer">
+            <apex:outputText value="{0,number,###,###,##0.00}">
+                <apex:param value="{!TotalBalance}"/>
+            </apex:outputText>
+            </apex:facet>
+        </apex:column>
+    </apex:pageBlockTable>
+        </apex:pageBlockSection>
+       </apex:pageBlock>
+</apex:component>

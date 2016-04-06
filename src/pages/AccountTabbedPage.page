@@ -1,0 +1,260 @@
+<apex:page standardController="Account" extensions="tabbedAccountExtension" >
+	<apex:includeScript value="https://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"/>
+
+	<script>   
+        $j = jQuery.noConflict();
+        $j(document).ready(function(){
+            collapseAllAddenda();
+        });
+        
+        function collapseAllAddenda(){
+            $j("[id*='Addendum']").parent().parent().hide();
+            }
+        
+        function switchMenu1(addendumsForContractId,minusImgId,plusImgId){
+            $j = jQuery.noConflict();       
+            $j("[id*='Addendum"+addendumsForContractId+"']").parent().parent().toggle();
+            $(minusImgId).toggle();
+            $(plusImgId).toggle();
+        } 
+    
+	</script>
+    
+    <style>
+        .addendumName,[id*='Addendum']{
+            margin-top:10px;
+            margin-left:50px;
+        }
+        .plusMinusSignClass{
+            margin-right:20px;
+        }
+     	.activeTab {
+            background-color: #43A4D1;
+            color: white;
+            background-image: none;
+            border-radius: 10px 10px 0 0;
+            padding: 4px 14px 4px 14px;
+            font-weight: bold;
+			box-shadow: 0px 3px 10px rgba(0, 0, 0, 0.56);
+			border-width: 1px 1px 0px;        
+        }
+
+     	.inactiveTab { 
+        	background-color: rgb(212, 233, 241); 
+        	color:black; 
+        	background-image:none;
+        	border-radius: 10px 10px 0 0;
+            padding: 4px 14px 4px 14px;
+            font-weight: normal;        
+        }
+        .tabHeaderClass {
+        	border-width: 1px;
+        }
+        .tabContentClass {
+        	box-shadow: 0px 1px 6px rgba(0, 0, 0, 0.16);
+        }
+        .rich-tabhdr-side-border {
+        	background-image:none;
+        }
+        .rich-tabhdr-side-cell {
+            border-top-style: none;
+		}
+    </style>
+    
+    <apex:form id="theForm">
+        <table style="margin-bottom:10px; margin-top:5px;">
+            <tr>
+                <td style="vertical-align:middle; padding-right: 30px; font-weight:bold">{!Account.Name}</td>
+                <td><apex:commandButton value="Save"/></td>
+                <td><apex:commandButton value="Edit"/></td>
+                <td><apex:commandButton value="Delete"/></td>
+                <td><apex:commandButton value="Clone"/></td>
+                <td><apex:commandButton value="New"/></td>
+            </tr>
+        </table>
+        
+        <apex:inlineEditSupport /> 
+        <apex:tabPanel switchType="client" selectedTab="Main" id="tabPanel" activeTabClass="activeTab" inactiveTabClass="inactiveTab" headerClass="tabHeaderClass" contentClass="tabContentClass">
+            <apex:tab label="Main" name="Main" id="MainTab">  
+                <table style="margin: 5px 0px 15px 0px;">
+                    <tr>
+                        <td>
+                            Account name:
+                        </td>
+                        <td style="width:200px;">
+                            <apex:outputField value="{!Account.Name}" label="Name" id="CompanyName"/>
+                         </td>
+                        <td>Phone:</td>
+                        <td><apex:outputField value="{!Account.Phone}" label="Phone" id="AccountPhone"/></td>
+                    </tr>
+                    <tr>
+                        <td>Account type:</td>
+                        <td><apex:outputField value="{!Account.Type}" label="Type" id="AccountType"/></td>
+                        <td>Website:</td>
+                        <td><apex:outputField value="{!Account.website}" label="website" id="Accountwebsite"/></td>
+                    </tr>
+                    <tr>
+                        <td>Billing street:</td>
+                        <td><apex:outputField value="{!Account.BillingStreet}" label="BillingStreet" id="BillingStreet"/></td>
+                    </tr>
+                    <tr>
+                        <td>Billing city:</td>
+                        <td><apex:outputField value="{!Account.BillingCity}" label="BillingCity" id="BillingCity"/></td>
+                    </tr>
+                </table>
+                <c:CCaccountBalances accountIDattribute="{!Account.ID}" accountNameAttribute="{!Account.Name}"/>
+            </apex:tab>
+            <apex:tab label="Contacts" name="Contacts" id="ContactsTab">  
+            </apex:tab>
+            <apex:tab label="Sales Invoices and Credit notes" name="Sales Invoices" id="SINTab">
+                <apex:pageBlock title="Выставленные инвойсы" id="SINs">
+                    
+                        <apex:PageBlockTable var="invoice" value="{!sin}">
+                            <apex:column headerValue="ID">                               
+                                <!--apex:outputLink value="{!invoice.ID}" target="_blank">{!invoice.Name}</apex:outputLink--> 
+                                <apex:commandLink action="{!openContract}" value="{!invoice.Name}" target="_blank">
+                                   <apex:param value="{!invoice.ID}" name="contractNumber"/>
+                                </apex:commandLink> 
+                            </apex:column>
+                            <apex:column headerValue="Number" value="{!invoice.c2g__CustomerReference__c}"/>
+                            <apex:column headerValue="Date" value="{!invoice.c2g__InvoiceDate__c}"/>
+                            <apex:column headerValue="Products" style="width:300px;">
+                                <apex:repeat value="{!invoice.c2g__InvoiceLineItems__r}" var="LineItem">
+                                    {!LineItem.c2g__Product__r.Name}<br/>
+                                </apex:repeat>
+                            </apex:column>
+                            <apex:column headerValue="Description" value="{!invoice.c2g__InvoiceDescription__c}" style="width:400px;"/>                            
+                            <apex:column headerValue="Total" value="{!invoice.c2g__InvoiceTotal__c}"/>
+                            <apex:column headerValue="Unpaid" value="{!invoice.c2g__OutstandingValue__c}"/>
+                            <apex:column headerValue="Currency" value="{!invoice.c2g__InvoiceCurrency__c}"/>
+                            <apex:column headerValue="Status" value="{!invoice.c2g__InvoiceStatus__c}"/>
+                            <apex:column headerValue="Scan">
+                                <apex:outputLink value="/servlet/servlet.FileDownload?file={!SINattachmentMap[invoice.ID]}" target="_blank" rendered="{!SINHasAttachment[invoice.ID]}">
+                                    View
+                                </apex:outputLink>
+                            </apex:column>
+                        </apex:PageBlockTable>
+                                      
+                    <apex:panelGrid columns="7" id="SINbuttons">
+                        <apex:commandLink action="{!SINBegining}" rendered="{!SINDisabledBack}" reRender="SINs,SINbuttons">В начало</apex:CommandLink><apex:outputText style="color:#888888;" rendered="{!IF(SINDisabledNext,IF(SINDisabledBack,false,SINDisabledNext),SINDisabledNext)}">В начало</apex:outputText> | 
+                        <apex:commandLink action="{!previousSINvoicePage}" rendered="{!SINDisabledBack}" reRender="SINs,SINbuttons">Назад</apex:CommandLink><apex:outputText style="color:#888888;" rendered="{!IF(SINDisabledNext,IF(SINDisabledBack,false,SINDisabledNext),SINDisabledNext)}">Назад</apex:outputText> | 
+                        С {!counterInvoices+1} по {!IF((counterInvoices+list_size)<total_size_SINs,(counterInvoices+list_size),total_size_SINs)} из {!total_size_SINs} |
+                        <apex:commandLink action="{!nextSINPage}" rendered="{!SINDisabledNext}" reRender="SINs,SINbuttons">Далее</apex:CommandLink><apex:outputText style="color:#888888;" rendered="{!IF(SINDisabledBack,IF(SINDisabledNext,false,SINDisabledBack),SINDisabledBack)}">Далее</apex:outputText> | 
+                        <apex:commandLink action="{!SINEnd}" rendered="{!SINDisabledNext}" reRender="SINs,SINbuttons">В конец</apex:CommandLink><apex:outputText style="color:#888888;" rendered="{!IF(SINDisabledBack,IF(SINDisabledNext,false,SINDisabledBack),SINDisabledBack)}">В конец</apex:outputText>
+                    </apex:panelGrid>
+                </apex:pageBlock>
+            </apex:tab>
+            <apex:tab label="Payable Invoices and Credit Notes" name="Payable Invoices" id="PINTab"></apex:tab>
+            <apex:tab label="Payments" name="Payments" id="PaymentsTab"></apex:tab>
+            <apex:tab label="Contracts" name="Contracts" id="ContractsTab">
+                <apex:pageBlock title="Контракты">
+                    
+                     <apex:panelGrid columns="7" id="but">
+                        <apex:commandLink action="{!Beginnning}" rendered="{!DisabledBack}" oncomplete="collapseAllAddenda()" reRender="but,contractsDataHolder">В начало</apex:CommandLink><apex:outputText style="color:#888888;" rendered="{!IF(DisabledNext,IF(DisabledBack,false,DisabledNext),DisabledNext)}">В начало</apex:outputText> | 
+                        <apex:commandLink action="{!Back10}" rendered="{!DisabledBack}" oncomplete="collapseAllAddenda()" reRender="but,contractsDataHolder">Назад</apex:CommandLink><apex:outputText style="color:#888888;" rendered="{!IF(DisabledNext,IF(DisabledBack,false,DisabledNext),DisabledNext)}">Назад</apex:outputText> | 
+                        C {!counter+1} по {!IF((counter+list_size)<total_size_contracts,(counter+list_size),total_size_contracts)} из  {!total_size_contracts} |
+                        <apex:commandLink action="{!Next10}" rendered="{!DisabledNext}" oncomplete="collapseAllAddenda()" reRender="but,contractsDataHolder">Далее</apex:CommandLink><apex:outputText style="color:#888888;" rendered="{!IF(DisabledBack,IF(DisabledNext,false,DisabledBack),DisabledBack)}">Далее</apex:outputText> | 
+                        <apex:commandLink action="{!End}" rendered="{!DisabledNext}" oncomplete="collapseAllAddenda()" reRender="but,contractsDataHolder">В конец</apex:CommandLink><apex:outputText style="color:#888888;" rendered="{!IF(DisabledBack,IF(DisabledNext,false,DisabledBack),DisabledBack)}">В конец</apex:outputText>
+                    </apex:panelGrid>
+                    
+                    <!---<apex:outputPanel id="buts">
+                    <table >
+                    <tr>
+                    <td><apex:commandButton action="{!Beginnning}" value="В начало" disabled="{!DisabledBack}" oncomplete="collapseAllAddenda()" reRender="but,contractsDataHolder"/></td>
+                    <td><apex:commandButton action="{!Back10}" value="Назад" disabled="{!DisabledBack}" oncomplete="collapseAllAddenda()" reRender="but,contractsDataHolder"/></td>
+                    <td style="color:#888888;"> C {!counter+1} по {!IF((counter+list_size)<total_size_contracts,(counter+list_size),total_size_contracts)} из  {!total_size_contracts}</td>
+                    <td><apex:commandButton action="{!Next10}" value="Далее" disabled="{!DisabledNext}" oncomplete="collapseAllAddenda()" reRender="but,contractsDataHolder"/></td>
+                    <td><apex:commandButton action="{!End}" value="В конец" disabled="{!DisabledNext}" oncomplete="collapseAllAddenda()" reRender="but,contractsDataHolder"/></td>
+                    </tr>
+                    </table>
+                    </apex:outputPanel>--->
+                    
+                    <apex:pageBlockTable value="{!contractsAndAddendumsList}" id="contractsDataHolder" var="document" rowClasses="dtr" >
+                        <apex:column headerValue="Contract number">
+                            <div id="{!document.objectType}{!document.contractID}">
+                                 <div style="width:30px;float:left;">
+                                    <apex:outputPanel rendered="{!IF((document.objectType='Addendum'),false,true)}" >
+                                        <apex:outputPanel id="plusi" style="{!IF((hasAddendum[document.contractID]),'','display:none')}">
+                                            <apex:image url="{!$Resource.Plus_Image}" onclick="switchMenu1('{!document.ID}','{!$Component.minusi}','{!$Component.plusi}')" title="More"/>
+                                        </apex:outputPanel>
+                                        <apex:outputPanel id="minusi" style="display:none">
+                                            <apex:image url="{!$Resource.Minus_Image}" onclick="switchMenu1('{!document.ID}','{!$Component.minusi}','{!$Component.plusi}')" title="Close"/>
+                                        </apex:outputPanel>
+                                    </apex:outputPanel>
+                                    &nbsp;
+                                </div>
+                                <div style="float:left;">
+                                    <apex:outputLink value="/{!document.Id}"  target="_blank" style="margin-top:10px" >{!document.Name}</apex:outputLink>
+                                </div>
+                            </div>
+                        </apex:column>
+                        <apex:column headerValue="Company name">
+                            <apex:outputText rendered="{!IF((document.objectType!='Addendum'),true,false)}">{!document.ourCompany}</apex:outputText>
+                        </apex:column>
+                        <apex:column headerValue="Signed date">
+                            <apex:outputText value="{0,date,MM'.'dd'.'yyyy}"><apex:param value="{!document.StartDate}"/></apex:outputText>
+                        </apex:column>                        
+                        <apex:column headerClass="View scan">
+                            <apex:outputLink value="/servlet/servlet.FileDownload?file={!attachmentMap[document.ID]}" target="_blank" rendered="{!hasAttachment[document.ID]}">
+                                View
+                            </apex:outputLink>
+                       </apex:column>
+                       
+                    </apex:pageBlockTable>
+                </apex:pageBlock>
+                
+            </apex:tab>
+            <apex:tab label="Settings" name="Settings" id="SettingsTab" rendered="{!isAdmin}">
+            <table>
+                <tr style="border-bottom:2px solid red;">
+                        <td>
+                            AR:
+                        </td>
+                        <td style="width:100px;">
+                            <apex:outputField value="{!Account.c2g__CODAAccountsReceivableControl__c}" label="AR"/>
+                         </td>
+                    <td>Base Credit Date 1:</td>
+                    <td style="width:100px;">
+                            <apex:outputField value="{!Account.c2g__CODABaseDate1__c}" label="BD1"/>
+                    </td>
+                    <td>Dimension 1:</td>
+                    <td><apex:outputField value="{!Account.c2g__CODADimension1__c}" label="Dim1"/></td>
+                    
+                    </tr>
+                <tr ><td>AP:</td>
+                        <td style="width:100px;">
+                            <apex:outputField value="{!Account.c2g__CODAAccountsPayableControl__c}" label="AP"/>
+                         </td>
+                    <td>Days Offset 1:</td>
+                    <td style="width:100px;">
+                            <apex:outputField value="{!Account.c2g__CODADaysOffset1__c}" label="DO1"/>
+                    </td>
+                    <td>Dimension 2:</td>
+                    <td><apex:outputField value="{!Account.c2g__CODADimension2__c}" label="Dim2"/></td>
+                </tr>
+                <tr><td>Default expense account:</td>
+                        <td style="width:100px;">
+                            <apex:outputField value="{!Account.c2g__CODADefaultExpenseAccount__c}" label="DEA"/>
+                         </td>
+                    <td></td>
+                    <td></td>
+                    <td>Dimension 3:</td>
+                    <td><apex:outputField value="{!Account.c2g__CODADimension3__c}" label="Dim3"/></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>Dimension 4:</td>
+                    <td><apex:outputField value="{!Account.c2g__CODADimension4__c}" label="Dim4"/></td>
+                </tr>
+                </table>
+            </apex:tab>
+            <apex:tab label="Attachments" name="attachments" id="attachmentsTab">
+                <c:CCDragAndDropAttachments objectID="{!acct.ID}">
+                </c:CCDragAndDropAttachments>
+            </apex:tab>
+        </apex:tabPanel>
+    </apex:form>
+</apex:page>

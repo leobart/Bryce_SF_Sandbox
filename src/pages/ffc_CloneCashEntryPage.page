@@ -1,0 +1,13 @@
+<apex:page standardController="c2g__codaCashEntry__c" extensions="FFC_CloneCashEntryController" >
+    <apex:form > 
+        <apex:pageBlock title="Create inverted clone" rendered="{!noErrors}" >
+    		<apex:outputLabel >Are you sure you want to make an inverted copy for Cash Entry {!cashEntry.Name}?</apex:outputLabel>
+            <apex:pageBlockButtons >
+                <apex:commandButton value="Yes" action="{!invertClone}"  />
+                <apex:commandButton value="Cancel" action="{!cancelPage}" />
+            </apex:pageBlockButtons>
+        </apex:pageBlock>
+        <apex:pageMessages />
+    </apex:form>
+
+</apex:page>

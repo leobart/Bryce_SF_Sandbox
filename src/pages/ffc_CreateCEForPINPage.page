@@ -1,0 +1,127 @@
+<apex:page standardController="Task" extensions="FFC_CreateCEForPINController" sidebar="false" 
+
+showHeader="false" tabStyle="c2g__codaTransactionLineItem__c">
+    
+    <apex:includeScript value="{!URLFOR($Resource.JQuery)}"/>  
+    <apex:includeScript value="{!URLFOR($Resource.JQueryBlockUI)}"/>  
+    <apex:includeScript value="{!URLFOR($Resource.BlockUIConfig)}"/>
+
+    <script>
+        var isClicked = false;
+    	var buttonPressed = false;
+    	var complete = false;
+        function checkDoubleSubmit(obj){
+        	if (isClicked) {
+            	return false;
+            }else {
+            	isClicked = true;
+                buttonPressed = true;
+                blockPage();
+                $j("[id*='CmdBtnGrp']").addClass("btnDisabled");
+                $j("[id*='CmdBtnGrp']").val("Processing...");
+                return true;
+            }
+        }
+        function cancelAction() {            
+            window.top.close();
+        }
+    	function completeAction(csh){
+            if (!window.location.origin) window.location.origin = window.location.protocol+"//"+window.location.host;
+            var cashentryId = document.getElementById(csh).value;
+            if(cashentryId != ''){
+                buttonPressed = true;               
+                complete = true;
+                var parent = window.parent;
+                if (parent && parent.postMessage) {
+                  parent.postMessage('reload', '*');
+                }
+                window.location = window.location.origin +'/'+cashentryId + '?isdtp=vw';
+            }
+        }
+    </script>
+	<style>
+        body, html {
+            background: linear-gradient(to top, #FFFFFF, #E4F8EA);
+            height: 100%;        
+        }
+        body .bPageBlock {
+			background-color: #f8f8f8;
+            border-bottom: 1px solid #D8D8D8;
+            border-left: 1px solid #D8D8D8;
+            border-right: 1px solid #D8D8D8;			
+			border-radius: 4px;
+			box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.15);
+        }
+    </style>
+    <apex:form >
+		<apex:sectionHeader title="New" subtitle="Cash Entry" />
+        <apex:actionStatus onstart="blockPage()" id="blockUI"/>
+        <div style="padding-left:10px;padding-right:10px">
+            <apex:pageBlock title="Cash Entry for Payable Invoice" id="commonBlock" >
+                <apex:pageBlockButtons location="bottom">
+                    <apex:commandButton id="CreateCmdBtnGrp" value="Create" action="{!createCashEntry}"
+                                        oncomplete="completeAction('{!$Component.cshId}')"
+                                        rendered="{!noInitErrors}" reRender="commonBlock" status="blockUI" />  
+
+   
+                    <apex:commandButton id="CancelCmdBtnGrp" value="Cancel" immediate="true" onclick="cancelAction();" />     
+                </apex:pageBlockButtons>
+                <apex:pageMessages />
+                <apex:inputHidden id="cshId" value="{!cashEntryId}"/>
+                <apex:outputPanel rendered="{!noInitErrors}"  >
+                    <h1>Cash Entry:</h1>
+                    <br/>
+                    <table>
+                        <tr>
+                            <td width="180px">Bank account:</td>
+                            <td><apex:inputField value="{!cashEntry.c2g__BankAccount__c}"/></td>
+                        </tr>
+                        <tr>
+                            <td>Cash Entry Reference:</td>
+                            <td><apex:outputField value="{!cashEntry.c2g__Reference__c}"/></td>
+                        </tr>
+                        <tr>
+                            <td>Description (max 255 characters):</td>
+                            <td><apex:inputTextarea value="{!cashEntry.c2g__Description__c}" style="height:50px;width:400px"/></td>
+                        </tr>
+                        <tr>
+                            <td>Date:</td>
+                            <td><apex:inputField value="{!cashEntry.c2g__Date__c}"/></td>
+                        </tr>
+                        <tr>
+                            <td>Period:</td>
+                            <td><apex:inputField value="{!cashEntry.c2g__Period__c}"/></td>
+                        </tr>
+                        <tr>
+                            <td>Payment method:</td>
+                            <td><apex:outputField value="{!cashEntry.c2g__PaymentMethod__c}"/></td>
+                        </tr>
+                        <tr>
+                            <td>Type:</td>
+                            <td>
+                                <apex:outputField value="{!cashEntry.c2g__Type__c}"/>
+                            </td>
+                        </tr>
+                        <!-- line item fields -->
+                         <tr>
+                            <td>Account:</td>
+                            <td><apex:outputField value="{!cashEntry.c2g__Account__c}"/></td>
+                        </tr>
+                        <tr>
+                            <td>Bank Charges GLA:</td>
+                            <td><apex:outputField value="{!cashEntry.c2g__ChargesGLA__c}"/></td>
+                        </tr>
+                        <tr>
+                            <td>Value:</td>
+                            <td><apex:inputField value="{!cashEntry.c2g__Value__c}"/></td>
+                        </tr>
+                        <tr>
+                            <td>Charges:</td>
+                            <td><apex:inputField value="{!cashEntry.c2g__TotalCharges__c}" id="chargesField"/></td>
+                        </tr>                        
+                    </table>
+                 </apex:outputPanel>
+            </apex:pageBlock>           
+        </div>
+    </apex:form>
+</apex:page>

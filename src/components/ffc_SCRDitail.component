@@ -1,0 +1,46 @@
+<apex:component >
+    <apex:attribute name="creditNote" type="c2g__codaCreditNote__c" required="true" description="Credit Note" />
+    <apex:attribute name="creditNoteLineItem" type="c2g__codaCreditNoteLineItem__c" required="true" description="Credit Note Line Item"/>
+    <c:ffc_DetailHeader >Создание Credit Note:</c:ffc_DetailHeader>
+	<table>
+    	<tr>
+        	<td style="vertical-align: middle; min-width: 160px">Account:</td>
+            <td><apex:outputField value="{!creditNote.c2g__Account__c}"/></td>
+        </tr>
+    	<tr>
+        	<td style="vertical-align: middle">Customer Reference:</td>
+            <td><apex:inputField value="{!creditNote.c2g__CustomerReference__c}" required="true" /></td>
+        </tr>
+    	<tr>
+        	<td style="vertical-align: middle">Date:</td>
+            <td><apex:inputField value="{!creditNote.c2g__CreditNoteDate__c}" required="true"/></td>
+        </tr>
+    	<tr>
+        	<td style="vertical-align: middle">Due Date:</td>
+            <td><apex:inputField value="{!creditNote.c2g__DueDate__c}" required="true"/></td>
+        </tr>
+    	<tr>
+        	<td style="vertical-align: middle">Period:</td>
+            <td><apex:inputField value="{!creditNote.c2g__Period__c}" required="true"/></td>
+        </tr>
+    	<tr>
+        	<td style="vertical-align: middle">Currency:</td>
+            <td><apex:outputField value="{!creditNote.c2g__CreditNoteCurrency__c}"/></td>
+        </tr>
+    	<tr>
+        	<td style="vertical-align: middle">Description:</td>
+            <td><apex:inputField value="{!creditNote.c2g__CreditNoteDescription__c}" style="height:50px;width:400px"/></td>
+        </tr>
+    	<tr>
+        	<td style="vertical-align: middle; font-weight: bold; padding-top: 10px" colspan="2">Line Item:</td>
+        </tr>
+    	<tr>
+        	<td style="vertical-align: middle">Product:</td>
+            <td><apex:inputField value="{!creditNoteLineItem.c2g__Product__c}" required="true"/></td>
+        </tr>
+    	<tr>
+        	<td style="vertical-align: middle">Unit Price:</td>
+            <td><apex:outputField value="{!creditNoteLineItem.c2g__UnitPrice__c}"/></td>
+        </tr>
+    </table>                  	
+</apex:component>

@@ -1,0 +1,132 @@
+<apex:page standardController="Delivery_Document__c" extensions="DDVolumeDistributionController">
+    <style>
+        .labelStyle{
+            font-weight: bold;
+        }
+        .valueStyle{
+            font-weight: bold;
+            color:#4791D5;
+        }
+        .apexp .totalRow{
+        	background-color: #EFF8F8;
+        }
+        body .pbBody table.list tr.dataRow th, body .pbBody table.list tr.dataRow td{
+        	border-width: 0 0 1px 1px;
+        }
+        
+        body .pbBody table.list tr th, body .pbBody table.list tr td{
+        	border: 0px solid #ededed;
+        }
+        
+        body .bRelatedList .pbBody table.list, body .apexp .pbBody table.list {
+			border: 1px solid #D5D5D5;
+			box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.17);
+		}
+        
+    </style>    
+    <c:pageHeader imageResource="{!$Resource.truck_ico}" title1="Volume Distribution for" title2="{!IF(document.Type__c=='Sell', 'Buyer', 'Seller')}"/>
+    <apex:form >       
+        <apex:pageBlock id="distributionsTable" >          
+        	<apex:outputPanel style="width:100%">
+            	<table  style="margin-top:40px;margin-bottom:40px" width="100%">
+                	<tr>
+                    	<td>
+                            <span class="labelStyle" style="margin-right:5px">Document</span>
+                            <apex:outputLink style="margin-right:10px" value="/{!document.id}">{!document.Name}</apex:outputLink>
+                            <span class="labelStyle" style="margin-right:2px">Contact:</span>
+                            <span class="valueStyle" style="margin-right:10px">{!document.Contract__r.Name}</span>
+                            <span class="labelStyle" style="margin-right:2px;{!IF(document.Addendum__r.Name!=null,'','display:none')}">Addebdum:</span>
+                            <span class="valueStyle" style="margin-right:10px;{!IF(document.Addendum__r.Name!=null,'','display:none')}">{!document.Addendum__r.Name}</span>
+                            <span class="labelStyle" style="margin-right:2px" >Account:</span>
+                            <span class="valueStyle" style="margin-right:10px" >{!document.Contract__r.Account.Name}</span>
+                            <span class="labelStyle" style="margin-right:2px" >Period:</span>
+                            <span class="valueStyle" style="margin-right:10px" >{!document.Planned_month__c}</span>
+                        </td>
+                        <td width="200px" style="border:0px">
+                        	<apex:outputLabel styleClass="labelStyle" style="margin-right:6px">Volume:</apex:outputLabel>
+                            <apex:outputText styleClass="valueStyle" value="{0,number,###,###,##0.000}"><apex:param value="{!document.Planned_volume__c}"/></apex:outputText>
+                        </td>
+                        <td width="200px" style="border:0px">
+                        	<apex:outputLabel styleClass="labelStyle" style="margin-right:6px">Distributed:</apex:outputLabel>                                        
+                            <apex:outputText styleClass="valueStyle" value="{0,number,###,###,##0.000}"><apex:param value="{!dpvd.summary}"/></apex:outputText>
+                        </td>
+                        <td width="200px" style="border:0px">
+                        	<apex:outputLabel styleClass="labelStyle" style="margin-right:6px">Balance:</apex:outputLabel>
+                            <apex:outputText styleClass="valueStyle" value="{0,number,###,###,##0.000}" style="{!IF((document.Planned_volume__c - dpvd.summary)<0,'color:red','')}"><apex:param value="{!(document.Planned_volume__c - dpvd.summary)}"/></apex:outputText>
+                        </td>
+                    </tr>
+                </table>
+            </apex:outputPanel>                   
+            <apex:pageMessages />                                
+            <apex:pageBlockTable value="{!dpvd.dRows}" var="dRow" style="border-style:solid;">                   
+                <apex:column style="width:100px" headerValue="Seller Document" rendered="{!document.Type__c='Sell'}">
+                    <apex:outputLink value="/apex/ddVolumeDistributionPage?id={!dRow.distribution.Buy_Document__c}">{!dRow.distribution.Buy_Document__r.Name}</apex:outputLink>
+                    <apex:facet name="footer">
+                        <apex:outputPanel >
+                            <apex:outputLabel styleClass="labelStyle">Summary</apex:outputLabel>
+                        </apex:outputPanel>
+                    </apex:facet>
+                </apex:column> 
+                <apex:column style="width:100px" headerValue="Buyer document" rendered="{!document.Type__c='Buy'}">
+                    <apex:outputLink value="/apex/ddVolumeDistributionPage?id={!dRow.distribution.Sell_Document__c}">{!dRow.distribution.Sell_Document__r.Name}</apex:outputLink>
+                    <apex:facet name="footer">
+                        <apex:outputPanel >
+                            <apex:outputLabel styleClass="labelStyle">Summary</apex:outputLabel>
+                        </apex:outputPanel>
+                    </apex:facet>
+                </apex:column>
+                <apex:column style="width:700px" headerValue="Description (Contract / Addendum / Account / Period)">
+                    <apex:selectList size="1" value="{!dRow.documentId}" rendered="{!dRow.showDocList}">
+                        <apex:selectOptions value="{!dRow.documentSL}" />
+                        <apex:actionSupport event="onchange" reRender="distributionsTable"/>
+                    </apex:selectList>
+                        <apex:outputLabel value="{!dRow.description}" rendered="{!NOT(dRow.showDocList)}"/> 
+                </apex:column>
+                <apex:column style="width:150px" headerValue="Available Volume" >
+                    <apex:outputText style="color:#AFAFAF" value="{0,number,###,###,##0.000}" rendered="{!dRow.status!='delete'}"><apex:param value="{!dRow.availableVolume}"/></apex:outputText>
+                </apex:column>
+                <apex:column style="width:200px" headerValue="Volume" onmouseover="document.getElementById('{!$Component.penIcoId}').style.visibility='{!IF(dRow.status == 'view','visible','hidden')}'" onmouseout="document.getElementById('{!$Component.penIcoId}').style.visibility='hidden'">
+                    <apex:actionSupport event="ondblclick" action="{!editRow}" reRender="distributionsTable" disabled="{!dRow.status != 'view'}">
+                        <apex:param name="p1" value="{!dRow.id}" assignTo="{!selectedRowId}"/>
+                    </apex:actionSupport>
+                    <span style="float:left">
+                        <apex:inputField value="{!dRow.distribution.Volume__c}" rendered="{!dRow.status != 'view' && dRow.status != 'delete'}">
+                            <apex:actionSupport event="onchange" reRender="distributionsTable"/>
+                        </apex:inputField> 
+                    </span>
+                    <apex:outputField value="{!dRow.distribution.Volume__c}" rendered="{!dRow.status == 'view' }" />
+       
+                    <apex:commandLink id="penIcoId" style="float:right; margin-right:5px; visibility:hidden" action="{!editRow}" reRender="distributionsTable" >
+                        <apex:image url="{!$Resource.pen_ico}"/> 
+                        <apex:param name="p1" value="{!dRow.id}" assignTo="{!selectedRowId}"/>
+                    </apex:commandLink>
+                    <apex:facet name="footer">
+                        <apex:outputPanel >
+                            <apex:outputText styleClass="valueStyle" value="{0,number,###,###,##0.000}"><apex:param value="{!dpvd.summary}"/></apex:outputText>
+                        </apex:outputPanel>
+                    </apex:facet>
+                </apex:column> 
+                <apex:column headerValue="Status:">
+                    <apex:outputLabel value="{!dRow.status}" />
+                </apex:column>
+                <apex:column style="width:19px">
+                    <apex:facet name="header">
+                        <apex:commandLink action="{!addDistributionRow}" reRender="distributionsTable" rendered="{!NOT(dpvd.allDocInUse)}">
+                            <apex:image url="{!$Resource.plus_image2}" />                                             
+                        </apex:commandLink>
+                    </apex:facet>
+                    <apex:commandLink action="{!delDistributionRow}" reRender="distributionsTable" rendered="{!dRow.status != 'delete'}">
+                        <apex:image url="{!$Resource.minus_image2}" /> 
+                        <apex:param name="p1" value="{!dRow.id}" assignTo="{!delRowId}"/>
+                    </apex:commandLink>
+                </apex:column>                            
+            </apex:pageBlockTable>
+            <apex:outputPanel style="width:100%; text-align:center">
+                <div style="height:30px;margin:10px">
+                    <apex:commandButton value="Commit" action="{!saveChanges}" rendered="{!changed}"/>
+                    <apex:commandButton value="Cancel" action="{!updateDistributionsList}" rendered="{!changed}"/>
+                </div>
+            </apex:outputPanel>
+        </apex:pageBlock>
+    </apex:form>  
+</apex:page>

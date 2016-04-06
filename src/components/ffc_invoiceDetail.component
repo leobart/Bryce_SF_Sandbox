@@ -1,0 +1,46 @@
+<apex:component >
+    <apex:attribute name="invoice" type="c2g__codaInvoice__c" required="true" description="Invoice" />
+    <apex:attribute name="invoiceLineItem" type="c2g__codaInvoiceLineItem__c" required="true" description="Invoice Line Item"/>
+    <c:ffc_DetailHeader >Создание Sales Invoice:</c:ffc_DetailHeader>
+	<table>
+    	<tr>
+        	<td style="vertical-align: middle; min-width: 160px">Account:</td>
+            <td><apex:outputField value="{!invoice.c2g__Account__c}"/></td>
+        </tr>
+    	<tr>
+        	<td style="vertical-align: middle">Customer reference:</td>
+            <td><apex:inputField value="{!invoice.c2g__CustomerReference__c}"  required="true" /></td>
+        </tr>
+    	<tr>
+        	<td style="vertical-align: middle">Date:</td>
+            <td><apex:inputField value="{!invoice.c2g__InvoiceDate__c}" required="true" /></td>
+        </tr>
+    	<tr>
+        	<td style="vertical-align: middle">Due Date:</td>
+            <td><apex:inputField value="{!invoice.c2g__DueDate__c}"  required="true" /></td>
+        </tr>
+    	<tr>
+        	<td style="vertical-align: middle">Period:</td>
+            <td><apex:inputField value="{!invoice.c2g__Period__c}" required="true"/></td>
+        </tr>
+    	<tr>
+        	<td style="vertical-align: middle">Currency:</td>
+            <td><apex:outputField value="{!invoice.c2g__InvoiceCurrency__c}"/></td>
+        </tr>
+    	<tr>
+        	<td style="vertical-align: middle">Description:</td>
+            <td><apex:inputField value="{!invoice.c2g__InvoiceDescription__c}" style="height:50px;width:400px"  required="true" /></td>
+        </tr>
+    	<tr>
+        	<td style="vertical-align: middle; font-weight: bold; padding-top: 10px" colspan="2">Line Item:</td>
+        </tr>
+    	<tr>
+        	<td style="vertical-align: middle">Product:</td>
+            <td><apex:inputField value="{!invoiceLineItem.c2g__Product__c}"  required="true" /></td>
+        </tr>
+    	<tr>
+        	<td style="vertical-align: middle">Unit Price:</td>
+            <td><apex:inputField value="{!invoiceLineItem.c2g__UnitPrice__c}"  required="true" /></td>
+        </tr>
+    </table>                  	
+</apex:component>

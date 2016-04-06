@@ -1,0 +1,157 @@
+<apex:component controller="BRC_MR_ItemsTreeController">   
+ 	
+    <script>             
+        function switchById(itemId){
+            $j = jQuery.noConflict(); 
+            $j("[id*='"+itemId+"plus']").toggle();
+            $j("[id*='"+itemId+"minus']").toggle();
+            $j("[id*='"+itemId+"row']").toggle();
+            document.getElementById(itemId+"cbox").firstElementChild.checked = !document.getElementById(itemId+"cbox").firstElementChild.checked;
+        }     
+	</script>
+       
+	<apex:attribute name="itemsTree" type="BRC_MR_ItemsTree" required="true" assignTo="{!tree}"  description="Tree"/>
+	<apex:attribute name="editMode" type="boolean" required="true"  description="edit mode"/>
+    <apex:attribute name="showGroupValues" type="boolean" required="true" description="group values"/>
+    
+    <apex:outputPanel id="itemsTree">
+    <apex:repeat value="{!itemsTree.mondayDateRootItem.childs}" var="itemL1" >
+        <table class="reportWidth" cellspacing="0" style="margin-bottom: 25px">
+            <tr>
+                <td colspan="2" class="tdLevel1Left" style="{!IF(itemL1.value == null, 'color:red', '')}">
+                    <span style="{!IF(itemL1.mrItem.Group__c,'','display:none')}">
+                        <img id="{!itemL1.mrItem.Id}plus" src="{!$Resource.brc_mr_plus_icon}" style="{!IF(!itemL1.isOpen, 'cursor:pointer','display:none; cursor:pointer')}" 
+                             onclick="switchById('{!itemL1.mrItem.Id}')"/>
+                        <img id="{!itemL1.mrItem.Id}minus" src="{!$Resource.brc_mr_minus_icon}" style="{!IF(itemL1.isOpen, 'cursor:pointer','display:none; cursor:pointer')}"  
+                             onclick="switchById('{!itemL1.mrItem.Id}')"/>
+                        <span id="{!itemL1.mrItem.Id}cbox" style="display:none"><apex:inputCheckbox value="{!itemL1.sourceItem.open}"/></span>
+                    </span>
+                    <span style="{!IF(!itemL1.mrItem.Group__c,'','display:none')}"><div class="indent"/></span>
+                    <span class="spanItemHeader"> {!itemL1.mrItem.Title__c} ({!itemL1.mrItem.currencyIsoCode})
+                    	<apex:outputLink target="_blank" value="/{!itemL1.mrItem.Id}" rendered="{!$Profile.Name == 'System Administrator'}">>></apex:outputLink>
+                    </span>
+                </td>
+                <td width="200px" class="tdLevel1Right"><c:brc_mr_value edit="{!editMode}" item="{!itemL1}" showGroupValues="{!showGroupValues}"/></td>
+            </tr>
+            <tr id="{!itemL1.mrItem.Id}row" style="{!IF(itemL1.isOpen, '','display:none')}" >
+                <td width="20px"></td>
+                <td colspan="2">
+                    <apex:repeat value="{!itemL1.childs}" var="itemL2" >
+                        <table width="100%" cellspacing="0">
+                            <tr class="rowClass">
+                                <td colspan="2" class="tdLevel2" style="{!IF(itemL2.value == null, 'color:red', '')}">
+                                    <span style="{!IF(itemL2.mrItem.Group__c,'','display:none')}">
+                                        <img id="{!itemL2.mrItem.Id}plus" src="{!$Resource.brc_mr_plus_icon}" style="{!IF(!itemL2.isOpen, 'cursor:pointer','display:none; cursor:pointer')}" 
+                                             onclick="switchById('{!itemL2.mrItem.Id}')"/>
+                                        <img id="{!itemL2.mrItem.Id}minus" src="{!$Resource.brc_mr_minus_icon}" style="{!IF(itemL2.isOpen, 'cursor:pointer','display:none; cursor:pointer')}"  
+                                             onclick="switchById('{!itemL2.mrItem.Id}')"/>
+                                        <span id="{!itemL2.mrItem.Id}cbox" style="display:none"><apex:inputCheckbox value="{!itemL2.sourceItem.open}"/></span>
+                                    </span>
+                                    <span style="{!IF(!itemL2.mrItem.Group__c,'','display:none')}"><div class="indent"/></span>
+                                    <span class="spanItemHeader"> {!itemL2.mrItem.Title__c} ({!itemL2.mrItem.currencyIsoCode})
+                                        <apex:outputLink target="_blank" value="/{!itemL2.mrItem.Id}" rendered="{!$Profile.Name == 'System Administrator'}">>></apex:outputLink>
+                                    </span>
+                                </td>
+                                <td width="200px" class="tdLevel2" align="right"><c:brc_mr_value edit="{!editMode}" item="{!itemL2}" showGroupValues="{!showGroupValues}"/></td>
+                            </tr>
+                            <tr id="{!itemL2.mrItem.Id}row" style="{!IF(itemL2.isOpen, '','display:none')}">
+                                <td width="20px"></td>
+                                <td colspan="2">
+                                    <apex:repeat value="{!itemL2.childs}" var="itemL3">
+                                        <table width="100%" cellspacing="0">
+                                            <tr class="rowClass">
+                                                <td colspan="2" class="tdLevel3" style="{!IF(itemL3.value == null, 'color:red', '')}">
+                                                    <span style="{!IF(itemL3.mrItem.Group__c,'','display:none')}">
+                                                        <img id="{!itemL3.mrItem.Id}plus" src="{!$Resource.brc_mr_plus_icon}" style="{!IF(!itemL3.isOpen, 'cursor:pointer','display:none; cursor:pointer')}" 
+                                                             onclick="switchById('{!itemL3.mrItem.Id}')"/>
+                                                        <img id="{!itemL3.mrItem.Id}minus" src="{!$Resource.brc_mr_minus_icon}" style="{!IF(itemL3.isOpen, 'cursor:pointer','display:none; cursor:pointer')}"  
+                                                             onclick="switchById('{!itemL3.mrItem.Id}')"/>
+                                                        <span id="{!itemL3.mrItem.Id}cbox" style="display:none"><apex:inputCheckbox value="{!itemL3.sourceItem.open}"/></span>
+                                                    </span>
+                                                    <span style="{!IF(!itemL3.mrItem.Group__c,'','display:none')}"><div class="indent"/></span>
+                                                    <span class="spanItemHeader"> {!itemL3.mrItem.Title__c} ({!itemL3.mrItem.currencyIsoCode})
+				                                        <apex:outputLink target="_blank" value="/{!itemL3.mrItem.Id}" rendered="{!$Profile.Name == 'System Administrator'}">>></apex:outputLink>
+                                                    </span>
+                                                </td>
+                                                <td width="200px" class="tdLevel3" align="right"><c:brc_mr_value edit="{!editMode}" item="{!itemL3}" showGroupValues="{!showGroupValues}"/></td>
+                                            </tr>
+                                            <tr id="{!itemL3.mrItem.Id}row" style="{!IF(itemL3.isOpen, '','display:none')}">
+                                                <td width="20px"></td>
+                                                <td colspan="2">
+                                                    <apex:repeat value="{!itemL3.childs}" var="itemL4">
+                                                        <table width="100%" cellspacing="0">
+                                                            <tr class="rowClass">
+                                                                <td colspan="2" class="tdLevel4" style="{!IF(itemL4.value == null, 'color:red', '')}">
+                                                                    <span style="{!IF(itemL4.mrItem.Group__c,'','display:none')}">
+                                                                        <img id="{!itemL4.mrItem.Id}plus" src="{!$Resource.brc_mr_plus_icon}" style="{!IF(!itemL4.isOpen, 'cursor:pointer','display:none; cursor:pointer')}" 
+                                                                             onclick="switchById('{!itemL4.mrItem.Id}')"/>
+                                                                        <img id="{!itemL4.mrItem.Id}minus" src="{!$Resource.brc_mr_minus_icon}" style="{!IF(itemL4.isOpen, 'cursor:pointer','display:none; cursor:pointer')}"  
+                                                                             onclick="switchById('{!itemL4.mrItem.Id}')"/>
+                                                                        <span id="{!itemL4.mrItem.Id}cbox" style="display:none"><apex:inputCheckbox value="{!itemL4.sourceItem.open}"/></span>
+                                                                    </span>
+                                                                    <span style="{!IF(!itemL4.mrItem.Group__c,'','display:none')}"><div class="indent"/></span>
+                                                                    <span class="spanItemHeader"> {!itemL4.mrItem.Title__c} ({!itemL4.mrItem.currencyIsoCode})
+								                                        <apex:outputLink target="_blank" value="/{!itemL4.mrItem.Id}" rendered="{!$Profile.Name == 'System Administrator'}">>></apex:outputLink>
+                                                                    </span>
+                                                                </td>
+                                                                <td width="200px" class="tdLevel4" align="right"><c:brc_mr_value edit="{!editMode}" item="{!itemL4}" showGroupValues="{!showGroupValues}"/></td>
+                                                            </tr>
+                                                            <tr id="{!itemL4.mrItem.Id}row" style="{!IF(itemL4.isOpen, '','display:none')}">
+                                                                <td width="20px"></td>
+                                                                <td colspan="2">
+                                                                    <apex:repeat value="{!itemL4.childs}" var="itemL5">
+                                                                        <table width="100%" cellspacing="0">
+                                                                            <tr class="rowClass">
+                                                                                <td colspan="2" class="tdLevel5" style="{!IF(itemL5.value == null, 'color:red', '')}">
+                                                                                    <span style="{!IF(itemL5.mrItem.Group__c,'','display:none')}">
+                                                                                        <img id="{!itemL5.mrItem.Id}plus" src="{!$Resource.brc_mr_plus_icon}" style="{!IF(!itemL5.isOpen, 'cursor:pointer','display:none; cursor:pointer')}" 
+                                                                                             onclick="switchById('{!itemL5.mrItem.Id}')"/>
+                                                                                        <img id="{!itemL5.mrItem.Id}minus" src="{!$Resource.brc_mr_minus_icon}" style="{!IF(itemL5.isOpen, 'cursor:pointer','display:none; cursor:pointer')}"  
+                                                                                             onclick="switchById('{!itemL5.mrItem.Id}')"/>
+                                                                                        <span id="{!itemL5.mrItem.Id}cbox" style="display:none"><apex:inputCheckbox value="{!itemL5.sourceItem.open}"/></span>
+                                                                                    </span>
+                                                                                    <span style="{!IF(!itemL5.mrItem.Group__c,'','display:none')}"><div class="indent"/></span>
+                                                                                    <span class="spanItemHeader"> {!itemL5.mrItem.Title__c} ({!itemL5.mrItem.currencyIsoCode})
+												                                        <apex:outputLink target="_blank" value="/{!itemL5.mrItem.Id}" rendered="{!$Profile.Name == 'System Administrator'}">>></apex:outputLink>
+                                                                                    </span>
+                                                                                </td>
+                                                                                <td width="200px" class="tdLevel5" align="right"><c:brc_mr_value edit="{!editMode}" item="{!itemL5}" showGroupValues="{!showGroupValues}"/></td>
+                                                                            </tr>
+                                                                            <tr id="{!itemL5.mrItem.Id}row" style="{!IF(itemL5.isOpen, '','display:none')}">
+                                                                                <td width="20px"></td>
+                                                                                <td colspan="2">
+                                                                                    <apex:repeat value="{!itemL5.childs}" var="itemL6">
+                                                                                        <table width="100%" cellspacing="0">
+                                                                                            <tr class="rowClass">
+                                                                                                <td colspan="2" class="tdLevel6" style="{!IF(itemL6.value == null, 'color:red', '')}">
+                                                                                                   <span style="{!IF(!itemL6.mrItem.Group__c,'','display:none')}"><div class="indent"/></span> 
+                                                                                                   <span class="spanItemHeader"> {!itemL6.mrItem.Title__c} ({!itemL6.mrItem.currencyIsoCode})
+																                                        <apex:outputLink target="_blank" value="/{!itemL6.mrItem.Id}" rendered="{!$Profile.Name == 'System Administrator'}">>></apex:outputLink>
+                                                                                                    </span>
+                                                                                                </td>
+                                                                                                <td width="200px" class="tdLevel6" align="right"><c:brc_mr_value edit="{!editMode}" item="{!itemL6}" showGroupValues="{!showGroupValues}"/></td>
+                                                                                            </tr>
+                                                                                        </table>
+                                                                                    </apex:repeat>              
+                                                                                </td>
+                                                                            </tr>
+                                                                        </table>
+                                                                    </apex:repeat>              
+                                                                </td>
+                                                            </tr>
+                                                        </table>
+                                                    </apex:repeat>              
+                                            	</td>
+                                        	</tr>
+                                      	</table>
+                                    </apex:repeat>              
+                                </td>
+                            </tr>
+                    	</table>
+                	</apex:repeat>              
+				</td>
+    		</tr>
+		</table>    
+	</apex:repeat>
+    </apex:outputPanel>
+</apex:component>

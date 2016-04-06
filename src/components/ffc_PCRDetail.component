@@ -1,0 +1,46 @@
+<apex:component >
+    <apex:attribute name="pcr" type="c2g__codaPurchaseCreditNote__c" required="true" description="PCR" />
+    <apex:attribute name="pcrLineItem" type="c2g__codaPurchaseCreditNoteLineItem__c" required="true" description="PCR Line Item"/>
+    <c:ffc_DetailHeader >Создание Payable Credit Note:</c:ffc_DetailHeader>
+	<table>
+    	<tr>
+        	<td style="vertical-align: middle;  min-width: 160px">Account:</td>
+            <td><apex:outputField value="{!pcr.c2g__Account__c}"/></td>
+        </tr>
+    	<tr>
+        	<td style="vertical-align: middle">Vendor Credit Note Number:</td>
+            <td><apex:inputField value="{!pcr.c2g__AccountCreditNoteNumber__c}" required="true"/></td>
+        </tr>
+    	<tr>
+        	<td style="vertical-align: middle">Date:</td>
+            <td><apex:inputField value="{!pcr.c2g__CreditNoteDate__c}" required="true"/></td>
+        </tr>
+    	<tr>
+        	<td style="vertical-align: middle">Due Date:</td>
+            <td><apex:inputField value="{!pcr.c2g__DueDate__c}" required="true"/></td>
+        </tr>
+    	<tr>
+        	<td style="vertical-align: middle">Period:</td>
+            <td><apex:inputField value="{!pcr.c2g__Period__c}" required="true"/></td>
+        </tr>
+    	<tr>
+        	<td style="vertical-align: middle">Currency:</td>
+            <td><apex:outputField value="{!pcr.c2g__CreditNoteCurrency__c}"/></td>
+        </tr>
+    	<tr>
+        	<td style="vertical-align: middle">Description:</td>
+            <td><apex:inputField value="{!pcr.c2g__CreditNoteDescription__c}" style="height:50px;width:400px"/></td>
+        </tr>
+    	<tr>
+        	<td style="vertical-align: middle; font-weight: bold; padding-top: 10px" colspan="2">Line Item:</td>
+        </tr>
+    	<tr>
+        	<td style="vertical-align: middle">Product:</td>
+            <td><apex:inputField value="{!pcrLineItem.c2g__Product__c}"/></td>
+        </tr>
+    	<tr>
+        	<td style="vertical-align: middle">Unit Price:</td>
+            <td><apex:outputField value="{!pcrLineItem.c2g__UnitPrice__c}"/></td>
+        </tr>
+    </table>                  	
+</apex:component>

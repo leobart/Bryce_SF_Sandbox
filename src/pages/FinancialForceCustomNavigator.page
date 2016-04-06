@@ -1,0 +1,28 @@
+<apex:page >
+    <style>
+    .box{
+        width:150px;
+        height:100px;
+        background-color:#CCFF99;
+        border-radius:10px;
+        text-align:center;
+        vertical-align:middle;
+        box-shadow:2px 2px 1px #CCCCCC;
+        border-color:white;
+        border-style:solid;
+        border-collapse:collapse;
+        margin-bottom:10px;
+        }
+
+    </style>
+    <apex:outputLink value="{!$Page.Invoice_Balances}">
+    <div class='box'>
+      Частично оплаченные инвойсы
+    </div>
+    </apex:outputLink>
+    <apex:outputLink value="">
+    <div class='box'>
+      Банковские выписки
+    </div>
+    </apex:outputLink>
+</apex:page>

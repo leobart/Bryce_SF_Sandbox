@@ -1,0 +1,93 @@
+<apex:page controller="DeliveryPlanViewController" >
+        
+    <apex:includeScript value="{!URLFOR($Resource.JQuery)}"/>  
+    <apex:includeScript value="{!URLFOR($Resource.JQueryBlockUI)}"/> 
+    <apex:includeScript value="{!URLFOR($Resource.BlockUIConfig)}"/>
+    
+    <style>
+    </style>
+        
+    <apex:form >
+        <apex:actionStatus onstart="blockPage()" onstop="unblockPage()" id="blockUI"/>
+        <apex:pageBlock title="Bulk Movements Creation Step 1" id="allPage">
+            <apex:pageBlockButtons >
+                <apex:commandButton action="{!commonPage}" value="Cancel"/>
+                <apex:commandButton action="{!bulkCreateAction}" value="Next"/>
+            </apex:pageBlockButtons>
+            <apex:pageMessages />
+            <table>
+                <tr>
+                    <td style="vertical-align: middle" width="150px"><apex:outputLabel >Choose buy document:</apex:outputLabel></td>
+                    <td >
+                        <apex:selectList size="1" style="width: 400px;" value="{!movementManager.bmcd.buyDocId}">
+                            <apex:selectOptions value="{!movementManager.bmcd.buyDocuments}"/>
+                        </apex:selectList>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle"><apex:outputLabel >Choose sell document:</apex:outputLabel></td>
+                    <td>
+                        <apex:selectList size="1" style="width: 400px;" value="{!movementManager.bmcd.sellDocId}">
+                            <apex:selectOptions value="{!movementManager.bmcd.sellDocuments}"/>
+                        </apex:selectList>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2" style="height:10px"></td>
+                </tr>
+                <tr>
+                    <td style="height:25px"><apex:outputLabel >Parse parameters for columns:</apex:outputLabel></td>
+                    <td>
+                    	<apex:commandLink style="padding: 1px" reRender="allPage" action="{!addColumnParseData}" status="blockUI" rendered="{!NOT(movementManager.bmcd.IsMaxParams)}">
+                        	<apex:image url="{!$Resource.plus_image2}" />
+                        </apex:commandLink>
+                    </td>
+                </tr>
+                <apex:variable value="0" var="rowNum"/>
+                <apex:repeat value="{!movementManager.bmcd.parseParams}" var="row">
+                    <tr>
+                        <td colspan="2">
+                            <table class="tableVerticalAlign">
+                                <tr>
+                                    <td style="vertical-align: middle; width:75px">
+                                        <apex:outputLabel >column № {!rowNum}</apex:outputLabel>                                        
+                                    </td>                                   	
+                                    <td>
+                                        <apex:selectList size="1" style="width: 150px;" value="{!row.colType}">
+                                            <apex:selectOptions value="{!movementManager.bmcd.columnTypeSO}"/>
+                                            <apex:actionSupport event="onchange" action="{!removeDublicatesFromParseParams}" reRender="allPage" status="blockUI"/>                                            
+                                        </apex:selectList>
+                                    </td>
+                                    <td>
+                                        <apex:selectList size="1" style="width:150px; margin-right:4px; margin-left:6px" value="{!row.addType}" rendered="{!row.isDocCol}">
+                                            <apex:selectOptions value="{!movementManager.bmcd.movementDocTypeSO}"/>
+                                            <apex:actionSupport event="onchange" action="{!removeDublicatesFromParseParams}" reRender="allPage" status="blockUI"/>                                            
+                                        </apex:selectList>
+                                    </td>
+                                    <td style="padding-top: 5px">
+                                        <apex:commandLink style="padding: 1px" action="{!deleteParseColumn}" reRender="allPage" status="blockUI">
+                                            <apex:image url="{!$Resource.minus_image2}" />                                           
+                                            <apex:param name="p1" value="{!rowNum}" assignTo="{!movementManager.bmcd.deleteParseParamNumber}"/>
+                                        </apex:commandLink>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>	
+                    </tr>
+                    <apex:variable var="rowNum" value="{!VALUE(rowNum) + 1}"/>
+                </apex:repeat>
+                <tr>
+                    <td colspan="2"><apex:outputLabel >Import data:</apex:outputLabel></td>
+                </tr>
+                <tr>
+                    <td colspan="2"><apex:inputTextarea cols="105" rows="10" value="{!movementManager.bmcd.inputData}"/></td>
+                </tr>
+            </table>
+            
+            
+
+            
+        </apex:pageBlock>
+    </apex:form>
+
+</apex:page>

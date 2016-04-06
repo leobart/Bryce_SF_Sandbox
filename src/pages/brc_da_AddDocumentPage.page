@@ -1,0 +1,36 @@
+<!-- 
+ 		Add attachment for object BRC_DA_Document_For_Approval__c
+ 		new attachment with prefix 'final', other attachments with prefix: 'v0', 'v1', 'v2' e.t.c
+ 		Author: Leonid Bartenev lbartenev@bryce.ch
+-->
+<apex:page standardController="BRC_DA_Document_For_Approval__c" extensions="BRC_DA_AddDocumentController" >
+    <apex:includeScript value="{!URLFOR($Resource.JQuery)}"/>  
+    <apex:includeScript value="{!URLFOR($Resource.JQueryBlockUI)}"/>  
+    <apex:includeScript value="{!URLFOR($Resource.BlockUIConfig)}"/>
+    <script>
+    	$j = jQuery.noConflict();
+    	var isClicked = false;
+        function checkDoubleSubmit(){
+        	if (isClicked) {
+            	return false;
+            }else {
+            	isClicked = true;
+                blockPage();
+                $j("[id*='CmdBtnGrp']").addClass("btnDisabled");
+                $j("[id*='CmdBtnGrp']").val("Processing...");
+                return true;
+            }
+        }
+    </script>
+    <apex:form >
+        <apex:sectionHeader title="Document For Approval" subtitle="{!objName}" />
+        <apex:pageBlock title="Add Document for : {!objName}">
+            <apex:pageMessages />
+            <apex:pageBlockButtons >
+                <apex:commandButton id="AddCmdBtnGrp" value="{!addAttachmentName}" action="{!addAttachmentAction}" onclick="return checkDoubleSubmit()"/>
+                <apex:commandButton id="CancelCmdBtnGrp" value="Cancel" action="{!cancelAddDocumentAction}" />               
+            </apex:pageBlockButtons>
+            <apex:inputfile value="{!attachment.body}" filename="{!attachment.name}" ></apex:inputfile>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

@@ -1,0 +1,46 @@
+<apex:page controller="DeliveryPlanViewController">
+
+   <apex:includeScript value="{!URLFOR($Resource.JQuery)}"/>  
+   <apex:includeScript value="{!URLFOR($Resource.JQueryBlockUI)}"/>  
+   <apex:includeScript value="{!URLFOR($Resource.BlockUIConfig)}"/>
+
+    <apex:form >
+        <apex:actionStatus onstart="blockPage()" onstop="unblockPage()" id="blockUI"/>
+        <apex:pageBlock title="Assign Movement Document for selected Movements">
+            <apex:pageBlockButtons >
+                <apex:commandButton value="Cancel" action="{!commonPage}" immediate="true"/>
+                <apex:commandButton value="Assign" rendered="{!movementManager.assignDocType!='none'}" action="{!assignDocForMovements}"/>
+         </apex:pageBlockButtons>
+         <apex:pageMessages />   
+         <apex:actionRegion rendered="{!movementManager.assignDocType!='none'}">
+             <apex:selectList size="1" value="{!movementManager.assignDocType}" style="margin-bottom: 15px; margin-top: 5px;">
+                 <apex:selectOption itemValue="select" itemLabel="Select Movement Document"/>
+                 <apex:selectOption itemValue="new" itemLabel="Create New Movement Document"/>
+                 <apex:actionSupport event="onchange" reRender="mainPanel" status="blockUI"/>
+             </apex:selectList>
+         </apex:actionRegion>
+         <apex:outputPanel id="mainPanel" rendered="{!movementManager.assignDocType!='none'}">
+            <apex:outputPanel id="selectDocPanel" rendered="{!movementManager.assignDocType=='select'}">
+                <table>
+                    <tr>
+                        <td width="150px">Select Movement Document</td>     
+                        <td><apex:inputField value="{!movementManager.mdfm.Movement_Document__c}"/></td>        
+                    </tr>
+                </table>
+            </apex:outputPanel>
+            <apex:outputPanel id="newDocPanel" rendered="{!movementManager.assignDocType=='new'}">
+                <table>
+                    <tr>
+                        <td width="150px">Document Id</td>      
+                        <td><apex:inputField value="{!movementManager.mDocument.Document_ID__c}"/></td>       
+                    </tr>
+                    <tr>
+                        <td>Document Type</td>      
+                        <td><apex:inputField value="{!movementManager.mDocument.Type__c}"/></td>      
+                    </tr>
+                </table>
+            </apex:outputPanel>
+         </apex:outputPanel>   
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

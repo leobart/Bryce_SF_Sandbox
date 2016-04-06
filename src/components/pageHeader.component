@@ -1,0 +1,23 @@
+<apex:component >
+    <apex:attribute name="imageResource" description="Todo"
+                    type="String" required="true"/>
+    <apex:attribute name="title1" description="Todo"
+                    type="String" required="true"/>
+    <apex:attribute name="title2" description="Todo"
+                    type="String" required="true"/>
+    
+    <div class="bPageTitle" style="margin-bottom:30px">
+    	<div class="ptBody"> 
+        	<div class="content">
+            	<apex:image style="float:left; background-position: 0 0; width:32px; height:32px; margin-top:5px;" 
+                            url="{!imageResource}" 
+                        	alt="{!title1}" 
+                        	title="{!title1}"/>
+                <h1 class="pageType">{!title1}<span class="titleSeparatingColon">:</span></h1>
+                <h2 class="pageDescription">{!title2}</h2>
+                <div class="blank">&nbsp;</div>
+            </div>
+        </div>
+    </div>
+
+</apex:component>

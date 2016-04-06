@@ -1,0 +1,24 @@
+<apex:page controller="BRC_MR_WeeklyManagementReportController" tabStyle="Weekly_Report__tab" title="Еженедельный отчет {!dayOfWeekFormated}" showHeader="false">
+
+    <apex:includeScript value="{!URLFOR($Resource.JQuery)}"/>  
+    
+    <apex:stylesheet value="{!$Resource.brc_mr_treeItemsStyle}"/>
+    
+    <apex:form >
+        <div style="margin-bottom: 60px; margin-left: 30px; margin-top: 10px">
+            <apex:pageMessages />
+            <table style="margin-bottom: 0.5cm">
+                <tr>
+                    <td><apex:image url="{!$Resource.bryce_logo}" style="width: 220px;" /></td>
+                    <td class="tdTitleClass">
+                        <span class="titleClass">Отчет {!dayOfWeekFormated}</span> 
+                    </td>
+                </tr>
+            </table>
+            <c:brc_mr_SummaryTable table="{!tree.summaryTable}" rendered="{!!tree.mondayDateRootItem.isEmptyChilds}"/>
+            <c:BRC_CR_Rates converter="{!tree.rateConverter}" rendered="{!!tree.mondayDateRootItem.isEmptyChilds}"/>
+            <c:brc_mr_items_tree itemsTree="{!tree}" editMode="{!editMode}"  showGroupValues="true"/>
+        </div>
+    </apex:form>
+    
+</apex:page>

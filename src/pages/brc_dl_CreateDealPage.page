@@ -1,0 +1,119 @@
+<apex:page controller="BRC_DL_DealController">
+    <apex:includeScript value="{!URLFOR($Resource.JQuery)}"/>  
+    <apex:includeScript value="{!URLFOR($Resource.JQueryBlockUI)}"/>  
+    <apex:includeScript value="{!URLFOR($Resource.BlockUIConfig)}"/>
+    <style>
+        .brcBlockStyle{
+            border: 1px solid #ADADAD;
+            padding: 10px 10px 0px 10px;
+            border-radius: 8px;
+            margin: 8px;
+        }
+		.Custom14Tab .tertiaryPalette{
+            background-color: #DBDBDB;
+            border-color: #D1BF74;
+		}
+        body .bPageBlock, 
+        body #bodyCell .bResource .secondaryPalette, 
+        body .secondaryPalette.bPageBlock, 
+        body .individualPalette .secondaryPalette.bPageBlock, 
+        body .bodyDiv .genericTable, body .genericPageBlockTable, 
+        body .bodyDiv .bSubBlock, 
+        body .bComponentBlock .bPageBlock, 
+        body .bMyDashboard .bPageBlock, 
+        body.rlHoverFrame .bPageBlock, 
+        body.subjectSelectionPopup div.choicesBox, 
+        body.lookupTab .secondaryPalette.bPageBlock, 
+        body.popupTab .secondaryPalette.bPageBlock, 
+        body.UserTagStatsPage .secondaryPalette.bPageBlock {
+            background-color: #FCFCFC;
+            border-bottom: 1px solid #eaeaea;
+            border-left: 1px solid #eaeaea;
+            border-right: 1px solid #eaeaea;
+            -moz-border-radius: 4px;
+            -webkit-border-radius: 4px;
+            border-radius: 4px;
+        }    
+    </style>
+    <apex:form >
+        <apex:actionStatus onstart="blockPage()" onstop="unblockPage()" id="blockUI"/>
+    	<apex:sectionHeader title="Bryce" subtitle="Create Deal"/>
+        <apex:outputPanel id="mainBlock"> 
+    		<apex:pageMessages />            
+            <table width="100%">
+                <tr>
+                    <td width="50%">
+                        <div>
+                            <apex:pageBlock mode="edit" title="Sell To:">
+                                <apex:pageBlockSection title="Contract details" collapsible="false">
+                                    <apex:inputField value="{!sellDeal.Contract__c}" />
+                                    <apex:inputField value="{!sellDeal.Addendum__c}" />
+                                </apex:pageBlockSection>
+                                <apex:pageBlockSection title="Agreement details" collapsible="false">
+                                    <apex:inputField value="{!sellDeal.Planned_Quantity__c}" />
+                                    <apex:inputField value="{!sellDeal.Preliminary_Price__c}" />
+                                    <apex:inputField value="{!sellDeal.Prepayment_Percent__c}" />
+                                    <apex:inputField value="{!sellDeal.Shipment_Month__c}" />
+                                </apex:pageBlockSection>
+                                <apex:pageBlockButtons location="bottom"/>
+                            </apex:pageBlock>
+                            <div style="display:none"><apex:inputField value="{!sellDeal.Company__c}"/></div>
+                            <div style="display:none"><apex:inputField value="{!sellDeal.Type__c}"/></div>
+                        </div>
+                    </td>
+                    <td><div  width="10px"/></td>
+                    <td width="50%">
+                        <apex:repeat value="{!buyDeals}" var="index">
+                            <div>
+                                <apex:pageBlock mode="edit" title="Buy From:">
+                                    <apex:pageBlockSection title="Deals details" collapsible="false">
+                                        <apex:pageBlockSectionItem >
+                                            <apex:outputLabel value="Select exsiting" for="useExistingCB"/>
+                                            <apex:actionRegion >
+                                                <apex:inputCheckbox value="{!buyDeals[index].useExisting}" id="useExistingCB"> 
+                                                    <apex:actionSupport event="onchange" reRender="mainBlock" status="blockUI" />
+                                                </apex:inputCheckbox>
+                                            </apex:actionRegion>
+                                        </apex:pageBlockSectionItem>
+                                        <apex:inputField value="{!buyDeals[index].dealR.Buy_Deal__c}" rendered="{!buyDeals[index].useExisting}" />
+                                    </apex:pageBlockSection>
+                                    <apex:pageBlockSection title="Contract details" collapsible="false" rendered="{!!buyDeals[index].useExisting}">
+                                        <apex:inputField value="{!buyDeals[index].buyDeal.Contract__c}" />
+                                        <apex:inputField value="{!buyDeals[index].buyDeal.Addendum__c}" />
+                                    </apex:pageBlockSection>
+                                    <apex:pageBlockSection title="Agreement details" collapsible="false" rendered="{!!buyDeals[index].useExisting}">
+                                        <apex:inputField value="{!buyDeals[index].buyDeal.Planned_Quantity__c}" />
+                                        <apex:inputField value="{!buyDeals[index].buyDeal.Preliminary_Price__c}" />
+                                        <apex:inputField value="{!buyDeals[index].buyDeal.Prepayment_Percent__c}" />
+                                        <apex:inputField value="{!buyDeals[index].buyDeal.Shipment_Month__c}" />
+                                    </apex:pageBlockSection>
+                                    <apex:pageBlockButtons location="bottom" style="text-align:right" rendered="{!buyDealSize>1}">
+                                        <apex:actionRegion >
+                                            <apex:commandButton value="Delete" reRender="mainBlock" status="blockUI" action="{!deleteBuyDealAction}">
+                                                <apex:param name="p1" value="{!index}" assignTo="{!selectedBuyDealNumber}"/>
+                                            </apex:commandButton>
+                                        </apex:actionRegion>
+                                    </apex:pageBlockButtons>
+                                </apex:pageBlock>
+                                <div style="display:none"><apex:inputField value="{!buyDeals[index].buyDeal.Company__c}"/></div>
+                                <div style="display:none"><apex:inputField value="{!buyDeals[index].buyDeal.Type__c}"/></div>
+                            </div>
+                        </apex:repeat>
+                        <div style="text-align:right; padding-right:10px;">
+                            <apex:commandButton value="Add Buy Deal" action="{!addBuyDealAction}" reRender="mainBlock" status="blockUI"/>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+            <table width="100%">
+                <tr>
+                    <td style="text-align:center">
+                        <apex:commandButton value="Create" action="{!createDealsAction}"/>
+                        <span style="margin-left:6px"/>
+                        <apex:commandButton value="Cancel" action="{!combackToDealPage}" immediate="true"/>
+                    </td>
+                </tr>
+            </table>
+    	</apex:outputPanel>
+    </apex:form>
+</apex:page>

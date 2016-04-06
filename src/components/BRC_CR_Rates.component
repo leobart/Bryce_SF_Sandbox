@@ -1,0 +1,18 @@
+<apex:component >
+    <apex:attribute name="converter" type="BRC_CR_RateConverter" required="true" description="Rates"/>
+    <div class="currencyHeader">
+        Курсы валют:
+    </div>
+    <table class="reportWidth" cellspacing="0" style="margin-bottom: 35px">
+        <tr >
+            <apex:repeat value="{!converter.ratesTable}" var="curr">
+                <td class="currencytTdHeader">{!curr}</td>
+            </apex:repeat>
+        </tr>        
+        <tr>
+            <apex:repeat value="{!converter.ratesTable}" var="curr">
+                <td class="currencyTdValue" >{!converter.ratesTable[curr]}</td>
+            </apex:repeat>
+        </tr>        
+    </table>
+</apex:component>

@@ -1,0 +1,15 @@
+<apex:page controller="FFC_CancelTransactionController">
+    <apex:includeScript value="{!URLFOR($Resource.JQuery)}"/>  
+    <apex:includeScript value="{!URLFOR($Resource.JQueryBlockUI)}"/>  
+    <apex:includeScript value="{!URLFOR($Resource.BlockUIConfig)}"/>
+    <apex:form >
+		<apex:sectionHeader title="Отмена транзакции (нейтрализация), результат" subtitle="{!objectName}" />
+        <apex:pageMessages />
+        <apex:actionStatus onstart="blockPage()" onstop="unblockPage()" id="blockUI"/>
+        <apex:pageBlock mode="maindetail">
+            <apex:pageBlockButtons location="bottom">
+                <apex:commandButton value="Ok" action="{!cancelAction}" style="width:80px"/>
+            </apex:pageBlockButtons>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

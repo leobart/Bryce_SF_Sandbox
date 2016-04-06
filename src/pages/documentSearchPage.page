@@ -1,0 +1,21 @@
+<apex:page controller="DocumentSelectController" showHeader="false" sidebar="false">
+    <!--apex:param assignTo="{!deliveryPlanId}" name="deliveryPlanId" value="{!deliveryPlanId}"/-->
+    <!--apex:param assignTo="{!fieldName}" name="fieldName" value="{!fieldName}"/-->
+    <script>
+        function passResults(x,y) {
+            window.opener.receiveResult('{!$CurrentPage.parameters.fieldName}',x,y)
+            window.top.close()
+        }
+    </script>    
+    <apex:form >
+        Field name: {!$CurrentPage.parameters.fieldName}
+        <br/>
+        Delivery plan Id: {!$CurrentPage.parameters.deliveryPlanId}
+        <apex:pageBlock title="Search document">
+            <apex:outputLink onclick="return passResults('zzzzz','rrrrrrr')">xxx</apex:outputLink>
+            <br/>
+            <apex:outputLink onmouseover="this.color='red'">yyyy</apex:outputLink>
+        </apex:pageBlock>
+            
+    </apex:form>
+</apex:page>

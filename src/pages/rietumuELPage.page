@@ -1,0 +1,225 @@
+<apex:page tabStyle="Rietumu_Enterprice_Link__tab" controller="RietumuELController" >
+
+    <apex:includeScript value="{!URLFOR($Resource.JQuery)}"/>  
+    <apex:includeScript value="{!URLFOR($Resource.JQueryBlockUI)}"/>  
+    <apex:includeScript value="{!URLFOR($Resource.BlockUIConfig)}"/>
+
+<script>
+    $j = jQuery.noConflict();
+    
+    function setFocusOnLoad(){}
+    
+    var rowId;
+    var blocked = false;
+    
+    function openWindow(url, divId){
+        rowId = divId;
+        var width = 680;
+        var height = 650;
+		mWin = window.open( url, '', 'width=' + width + 
+                           			',height=' + height + 
+                           			',left=' + ((window.innerWidth - width)/2) + 
+                           			',top=' + ((window.innerHeight - height)/2) );
+        block();       
+        showProcessedRow();
+        setTimeout(function () {
+            if (mWin.closed && !mWin.complete){
+                unblock();
+            }else{
+                setTimeout(arguments.callee, 10);
+            }
+        }, 10);
+    }
+    
+    function showProcessedRow(){
+		if(blocked) $j("[id=" + rowId + "]").parent().parent().children().addClass( "processedCell" ); 
+    }
+    
+    function hideProcessedRow(){
+    	$j("[id=" + rowId + "]").parent().parent().children().removeClass("processedCell");
+    }
+   
+    function openMatchingToolWindow(cshId, divId){
+		var url = '/apex/ffc_CEMatchingToolPage?Id=' + cshId;
+        openWindow(url, divId);
+    }
+    function openCreateCEWindow(parameters, divId){
+        var url = '/apex/rietumuELCreateCEPage?' + parameters;
+        openWindow(url, divId);
+    }
+    function updateAction(csh, trn, chargeTrn){
+        updateTrn(csh, trn, chargeTrn);
+        showProcessedRow();
+    }
+    function updateAllAction(){
+        updateTrnList();        
+    }
+    function unblock(){
+        blocked = false;
+    	hideProcessedRow();
+        unblockPage();
+    }
+    function block(){
+        blocked = true;
+        blockPage();
+    }
+</script>
+<style>
+    .actionLink{
+        color:#015ba7;
+        text-decoration: none;
+    }
+    .actionLink:hover{
+        color:#015ba7;
+        text-decoration: underline;
+    }
+    .createCECell, .matchedCell, .processedCell, .commonCell{
+    	height: 56px;
+    }
+    
+    .commonCell{
+    	background:#FFFFF7;
+    }
+    
+    .matchedCell{
+    	background:#FFFFFF;
+    }
+    
+    .createCECell{
+    	background:#F7FDF7;
+    }
+    
+    .processedCell{
+    	background:#FFEAA9;
+    }
+    
+    .clsCenter{
+		text-align:center;
+    }
+    
+    body .pbBody table.list tr.headerRow td, body .pbBody table.list tr.headerRow th 
+    {
+        background: #FFFFFF;
+        border-width: 0 0 1px 1px;
+        border-color: #B9B9B9;
+        color: #000;
+        font-size: 1.1em;
+        font-weight: bold;
+        padding: 5px 2px 4px 5px;
+        height: 20px;
+        /* background: linear-gradient(#EEEDEB,#EEEDEC); */
+        border-width: 0px 0px 3px 0px;
+    }  
+    body .bRelatedList .pbBody table.list, body .apexp .pbBody table.list {
+	    border: 0px solid #e0e3e5;
+    }
+    
+    .errorConsole .x-grid3-row-over, body .pbBody table.list tr.dataRow.highlight td, body .pbBody table.list tr.dataRow.highlight th {
+    	background-color: #FDF7E4;
+    }
+</style>
+
+<apex:form >
+    <apex:image url="{!$Resource.rietumuELLogo}" style="margin-bottom: 20px; margin-top: 15px;" />
+    <apex:actionFunction action="{!prepereTransactions}" name="updateTrnList" reRender="resultPanel" oncomplete="showProcessedRow();" />
+    <apex:actionFunction action="{!updateTransaction}" name="updateTrn" reRender="resultPanel" oncomplete="unblock()" >
+		<apex:param name="csh" assignTo="{!cashEntryId}" value=""/>
+		<apex:param name="trn" assignTo="{!updatedTrnId}" value="" />
+		<apex:param name="chargeTrn" assignTo="{!updatedChargeTrnId}" value="" />
+    </apex:actionFunction>
+    <apex:actionStatus onstart="blockPage()" onstop="unblockPage()" id="blockUI"/>
+    <apex:outputPanel id="fullPage">
+	<apex:pageBlock mode="maindetail">
+        <apex:outputPanel rendered="{!userAllowed}">
+            <table style="width:100%">
+                <tr>
+                    <td style="vertical-align: middle;"><apex:outputLabel >Company:</apex:outputLabel></td>
+                    <td style="vertical-align: middle;"><apex:outputLabel style="font-weight: bold; font-size: 11pt;">{!companyName}</apex:outputLabel></td>
+
+                    <td style="vertical-align: middle;"><apex:outputLabel >Bank Account:</apex:outputLabel></td>
+                    <td style="vertical-align: middle;">
+                        <apex:selectList value="{!bAccountId}" size="1" style="font-weight: bold">
+                            <apex:actionSupport event="onchange" action="{!transactionsRequest}" reRender="fullPage" status="blockUI" />
+                            <apex:selectOptions value="{!bAccounts}"/>
+                        </apex:selectList>
+                    </td>
+
+                    <td style="vertical-align: middle;"><apex:outputLabel >Date from:</apex:outputLabel></td>
+                    <td style="vertical-align: middle;"><apex:inputText value="{!startDateS}" style="font-weight: bold" id="dateFrom" onfocus="DatePicker.pickDate(true, '{!$Component.dateFrom}', false);"/></td>
+
+                    <td style="vertical-align: middle;"><apex:outputLabel >Date till:</apex:outputLabel></td>
+                    <td style="vertical-align: middle;"><apex:inputText value="{!endDateS}" style="font-weight: bold" id="dateTill" onfocus="DatePicker.pickDate(true, '{!$Component.dateTill}', false);"/></td>
+
+                    <td style="vertical-align: middle;"><apex:outputLabel >Language:</apex:outputLabel></td>
+                    <td style="vertical-align: middle; font-weight: bold">
+                        <apex:selectList size="1" value="{!lang}" disabled="true" >
+                            <apex:actionSupport event="onchange" action="{!transactionsRequest}" reRender="fullPage" status="blockUI" />
+                            <apex:selectOption itemValue="EN" itemLabel="EN"/>
+                            <apex:selectOption itemValue="RU" itemLabel="RU"/>
+                            <apex:selectOption itemValue="LV" itemLabel="LV"/>
+                            <!--apex:selectOption itemValue="DE" itemLabel="DE"/-->
+                        </apex:selectList>
+                    </td>
+                    <td >
+                        <apex:outputPanel style="float: right; margin-right: 20px;">
+                            <apex:commandButton value="<< Prev Month" action="{!prevMonth}" reRender="fullPage" status="blockUI" style="margin-right:10px"/>                            
+                            <apex:commandButton value="View" action="{!transactionsRequest}" reRender="fullPage" status="blockUI" style="margin-right:10px"/>                            
+                            <apex:commandButton value="Next Month >>" action="{!nextMonth}" reRender="fullPage" status="blockUI"/>                            
+                        </apex:outputPanel>
+                    </td>
+                </tr>
+            </table> 
+            <!--apex:inputTextarea value="{!body}"/-->
+        </apex:outputPanel>    
+    	<apex:pageMessages />            
+    </apex:pageBlock>
+    
+    <apex:pageblock id="transactionsBlock" rendered="{!(transactionsCount>0)}" mode="maindetail">
+        <apex:outputPanel id="resultPanel">
+                
+              <apex:pageBlockTable value="{!transactionList}" var="trans" width="100%">
+                   <!--apex:column headerValue="Unique ID" value="{!trans.uniqueId}"/-->
+                   <!--apex:column headerValue="Refno" value="{!trans.refno}"/-->
+                   <apex:column headerValue="Date" style="width:80px" styleClass="{!trans.cssClass}" >
+                       <div id="{!trans.allowedUniqeuId}" />
+                       <apex:outputText value="{0,date,dd'/'MM'/'yyyy}"><apex:param value="{!trans.tdate}" /></apex:outputText>
+                   </apex:column>
+                   <apex:column headerValue="Beneficiary Name" width="160px" value="{!trans.benname}" styleClass="{!trans.cssClass}"/>
+                   <apex:column headerValue="Type" width="160px" value="{!trans.trndesc}" styleClass="{!trans.cssClass}"/>
+                   <apex:column headerValue="Ditails" value="{!trans.details}" styleClass="{!trans.cssClass}"/>
+                   <apex:column headerValue="Ben. Account" width="210px" value="{!trans.benacc}" styleClass="{!trans.cssClass}"/>
+                   <apex:column headerValue="Ben. Bank" width="140px" value="{!trans.benbank}" styleClass="{!trans.cssClass}"/>
+                   <apex:column headerValue="Currency" width="120px" headerClass="clsCenter" styleClass="{!trans.cssClass}" style="text-align:center">
+                       <apex:outputLink value="/{!trans.ceCur.Id}" target="_blank" rendered="{!trans.ceCur != null}">{!trans.ceCur.Name}</apex:outputLink>
+                   </apex:column>
+                   <apex:column headerValue="Amount" width="95px" styleClass="{!trans.cssClass}"><apex:outputText value="{0,number,###,###,##0.00}"><apex:param value="{!trans.amount}"/></apex:outputText></apex:column>
+                   <apex:column headerValue="Saldo" width="95px" styleClass="{!trans.cssClass}"><apex:outputText value="{0,number,###,###,##0.00}"><apex:param value="{!trans.saldo}"/></apex:outputText></apex:column>
+                   <apex:column headerValue="Cash Entry" width="95px" headerClass="clsCenter" styleClass="{!trans.cssClass}" style="text-align:center" >
+                        <apex:outputPanel rendered="{!trans.tdate >= releaseDate}">
+                           <apex:commandButton value="Create"
+                                               onclick="openCreateCEWindow('{!trans.parameters}', '{!trans.allowedUniqeuId}')"
+                                               rendered="{!trans.cashEntry == null}" reRender="nothing">
+                               <apex:param name="p1" value="{!trans.uniqueId}" assignTo="{!selectedTransactionId}"/>
+                            </apex:commandButton>
+                            <apex:outputLink value="/{!trans.cashEntry.Id}" target="_blank" rendered="{!trans.cashEntry != null}">{!trans.cashEntry.Name}</apex:outputLink>
+                        </apex:outputPanel>
+                        <apex:outputPanel rendered="{!trans.tdate < releaseDate}">
+                            <apex:outputLabel style="color:#979797">Manual</apex:outputLabel>
+                        </apex:outputPanel>
+                   </apex:column>
+                   <apex:column headerValue="Matched" headerClass="clsCenter" styleClass="{!trans.cssClass}" style="text-align:center"  width="105px">
+                       <!--apex:outputText value="Matched" rendered="{!trans.matched}" /-->
+                       <apex:image url="{!$Resource.selected_ico}" style="width:10px;" rendered="{!trans.matched}"/>
+                       <apex:commandButton value="Matching Tool"
+                                           onclick="openMatchingToolWindow('{!trans.cashEntry.Id}', '{!trans.allowedUniqeuId}')"
+                                           rendered="{!!trans.matched && trans.cashEntry !=null}"
+                                           reRender="nothing" />
+                   </apex:column>
+                </apex:pageBlockTable>
+                <br/> <br/>
+        </apex:outputPanel>
+
+    </apex:pageblock>
+    </apex:outputPanel>    
+</apex:form>
+</apex:page>
