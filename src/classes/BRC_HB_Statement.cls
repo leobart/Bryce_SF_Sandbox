@@ -1,6 +1,6 @@
 // Helenic Bank statement for some period, account number and currency.
 // This class initialased with data as a string. This string must contain all statement data.
-// Author Leonid Bartenev barteneff@gmail.com
+// Author Leonid Bartenev barteneff@gmail.com   
 
 public class BRC_HB_Statement {
     
