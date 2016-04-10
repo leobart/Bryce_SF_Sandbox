@@ -1,0 +1,292 @@
+{
+    "properties": [
+        {
+            "modifiers": [
+                "public"
+            ], 
+            "name": "datesInterval", 
+            "visibility": "PUBLIC", 
+            "references": [], 
+            "location": {
+                "column": 19, 
+                "line": 7
+            }, 
+            "type": "String"
+        }, 
+        {
+            "modifiers": [
+                "public"
+            ], 
+            "name": "bankAccountNumber", 
+            "visibility": "PUBLIC", 
+            "references": [], 
+            "location": {
+                "column": 19, 
+                "line": 8
+            }, 
+            "type": "String"
+        }, 
+        {
+            "modifiers": [
+                "public"
+            ], 
+            "name": "currencyCode", 
+            "visibility": "PUBLIC", 
+            "references": [], 
+            "location": {
+                "column": 19, 
+                "line": 9
+            }, 
+            "type": "String"
+        }, 
+        {
+            "modifiers": [
+                "public"
+            ], 
+            "name": "bankAccount", 
+            "visibility": "PUBLIC", 
+            "references": [], 
+            "location": {
+                "column": 36, 
+                "line": 10
+            }, 
+            "type": "c2g__codaBankAccount__c"
+        }, 
+        {
+            "modifiers": [
+                "public"
+            ], 
+            "name": "transactions", 
+            "visibility": "PUBLIC", 
+            "references": [], 
+            "location": {
+                "column": 41, 
+                "line": 12
+            }, 
+            "type": "LIST"
+        }, 
+        {
+            "modifiers": [
+                "public"
+            ], 
+            "name": "transactionsMap", 
+            "visibility": "PUBLIC", 
+            "references": [], 
+            "location": {
+                "column": 48, 
+                "line": 13
+            }, 
+            "type": "Map"
+        }
+    ], 
+    "externalReferences": [], 
+    "innerClasses": [
+        {
+            "properties": [], 
+            "externalReferences": [], 
+            "innerClasses": [], 
+            "interfaces": [], 
+            "constructors": [], 
+            "namespace": null, 
+            "name": "BRC_HB_Exception", 
+            "tableDeclaration": {
+                "type": "BRC_HB_Exception", 
+                "modifiers": [
+                    "public"
+                ], 
+                "references": [], 
+                "location": {
+                    "column": 18, 
+                    "line": 15
+                }, 
+                "name": "BRC_HB_Exception"
+            }, 
+            "key": null, 
+            "variables": [], 
+            "id": null, 
+            "methods": []
+        }
+    ], 
+    "interfaces": [], 
+    "constructors": [
+        {
+            "modifiers": [
+                "public"
+            ], 
+            "name": "BRC_HB_Statement", 
+            "parameters": [
+                {
+                    "type": "String", 
+                    "name": "data"
+                }
+            ], 
+            "visibility": "PUBLIC", 
+            "references": [], 
+            "location": {
+                "column": 12, 
+                "line": 17
+            }, 
+            "type": null
+        }
+    ], 
+    "namespace": null, 
+    "name": "BRC_HB_Statement", 
+    "tableDeclaration": {
+        "type": "BRC_HB_Statement", 
+        "modifiers": [
+            "public"
+        ], 
+        "references": [], 
+        "location": {
+            "column": 14, 
+            "line": 5
+        }, 
+        "name": "BRC_HB_Statement"
+    }, 
+    "key": "01pL000000043LOIAY", 
+    "variables": [
+        {
+            "type": "String", 
+            "modifiers": [], 
+            "references": [], 
+            "location": {
+                "column": 36, 
+                "line": 17
+            }, 
+            "name": "data"
+        }, 
+        {
+            "type": "LIST", 
+            "modifiers": [], 
+            "references": [], 
+            "location": {
+                "column": 18, 
+                "line": 18
+            }, 
+            "name": "rows"
+        }, 
+        {
+            "type": "String", 
+            "modifiers": [], 
+            "references": [], 
+            "location": {
+                "column": 20, 
+                "line": 20
+            }, 
+            "name": "row"
+        }, 
+        {
+            "type": "LIST", 
+            "modifiers": [], 
+            "references": [], 
+            "location": {
+                "column": 35, 
+                "line": 32
+            }, 
+            "name": "bankAccList"
+        }, 
+        {
+            "type": "LIST", 
+            "modifiers": [], 
+            "references": [], 
+            "location": {
+                "column": 38, 
+                "line": 41
+            }, 
+            "name": "trnList"
+        }, 
+        {
+            "type": "BRC_HB_TransactionLine", 
+            "modifiers": [], 
+            "references": [], 
+            "location": {
+                "column": 36, 
+                "line": 42
+            }, 
+            "name": "tline"
+        }, 
+        {
+            "type": "BRC_HB_TransactionLine", 
+            "modifiers": [], 
+            "references": [], 
+            "location": {
+                "column": 36, 
+                "line": 43
+            }, 
+            "name": "tLineFromMap"
+        }, 
+        {
+            "type": "Set", 
+            "modifiers": [], 
+            "references": [], 
+            "location": {
+                "column": 21, 
+                "line": 59
+            }, 
+            "name": "uniqueIds"
+        }, 
+        {
+            "type": "LIST", 
+            "modifiers": [], 
+            "references": [], 
+            "location": {
+                "column": 34, 
+                "line": 60
+            }, 
+            "name": "bankTrnList"
+        }, 
+        {
+            "type": "Rietumu_Transaction__c", 
+            "modifiers": [], 
+            "references": [], 
+            "location": {
+                "column": 36, 
+                "line": 68
+            }, 
+            "name": "bankTrn"
+        }, 
+        {
+            "type": "BRC_HB_TransactionLine", 
+            "modifiers": [], 
+            "references": [], 
+            "location": {
+                "column": 36, 
+                "line": 69
+            }, 
+            "name": "tLine"
+        }
+    ], 
+    "id": "01pL000000043LOIAY", 
+    "methods": [
+        {
+            "modifiers": [
+                "private"
+            ], 
+            "name": "prepareTransactions", 
+            "parameters": [], 
+            "visibility": "PRIVATE", 
+            "references": [], 
+            "location": {
+                "column": 18, 
+                "line": 39
+            }, 
+            "returnType": "void", 
+            "type": null
+        }, 
+        {
+            "modifiers": [
+                "public"
+            ], 
+            "name": "loadCashEntriesForTrn", 
+            "parameters": [], 
+            "visibility": "PUBLIC", 
+            "references": [], 
+            "location": {
+                "column": 17, 
+                "line": 58
+            }, 
+            "returnType": "void", 
+            "type": null
+        }
+    ]
+}

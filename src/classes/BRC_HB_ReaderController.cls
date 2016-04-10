@@ -1,3 +1,5 @@
+// Import transactions from Helenic Bank и создание Financial Force CashEntries CSH
+// Author Leonid Bartenev Barteneff@gmail.com
 public class BRC_HB_ReaderController {
     
     public string errorMessage {get; set;}

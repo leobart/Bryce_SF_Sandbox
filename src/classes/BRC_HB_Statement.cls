@@ -1,3 +1,7 @@
+// Helenic Bank statement for some period, account number and currency.
+// This class initialased with data as a string. This string must contain all statement data.
+// Author Leonid Bartenev barteneff@gmail.com
+
 public class BRC_HB_Statement {
     
     public String datesInterval {get; set;}
@@ -26,8 +30,8 @@ public class BRC_HB_Statement {
         }
         
         c2g__codaBankAccount__c[] bankAccList = [SELECT Id, Name, c2g__OwnerCompany__r.Id, c2g__OwnerCompany__r.Name 
-                                               FROM c2g__codaBankAccount__c 
-                                               WHERE c2g__AccountNumber__c =: bankAccountNumber];
+                                                 FROM c2g__codaBankAccount__c 
+                                                 WHERE c2g__AccountNumber__c =: bankAccountNumber];
         if(bankAccList.size() > 0) bankAccount = bankAccList[0];
 		prepareTransactions();
     } 
