@@ -1,3 +1,5 @@
+// Helenic Bank Statement Transaction Line
+// Author Leonid Bartenev barteneff@gmail.com, lbartenev@bryce.ch
 public class BRC_HB_TransactionLine {
     
     public String bankAccountNumber {get; set;}

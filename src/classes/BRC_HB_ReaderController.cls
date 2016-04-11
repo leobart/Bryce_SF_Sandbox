@@ -1,4 +1,4 @@
-// Import transactions from Helenic Bank и создание Financial Force CashEntries CSH
+// Import transactions from Helenic Bank and creation Financial Force Cash Entries (CSH)
 // Author Leonid Bartenev Barteneff@gmail.com
 public class BRC_HB_ReaderController {
     
